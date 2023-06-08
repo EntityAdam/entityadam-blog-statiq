@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+  <title>My Blog - Always use IEquatable&lt;T&gt; for Value Types</title>
+
+  <link rel="canonical" href='/posts/2020-01-21-value-types-iequatable'>
+
+      <link type="application/rss+xml" rel="alternate" href="/feed.rss" />
+      <link type="application/atom+xml" rel="alternate" href="/feed.atom" />
+
+  <meta name="application-name" content='My Blog' />
+  <meta name="msapplication-tooltip" content='My Blog' />
+  <meta name="msapplication-starturl" content='/' />
+
+  <meta property="og:title" content='My Blog - Always use IEquatable&lt;T&gt; for Value Types' />
+    <meta property="og:image" content='/posts/img/adam-avatar-final-trans-400.png' />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content='/posts/2020-01-21-value-types-iequatable' />
+
+  <link rel="icon" href='/favicon.ico'>
+
+  <!-- Custom fonts for this template -->
+  <link href='/vendor/fontawesome-free/css/all.min.css' rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic" rel="stylesheet" data-no-mirror>
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800" rel="stylesheet" data-no-mirror>
+
+  <!-- Styles for this template (also includes Bootstrap) -->
+  <link href='/scss/clean-blog.css' rel="stylesheet">
+
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js" data-no-mirror></script>
+  <script src="https://cdn.jsdelivr.net/npm/quicklink@2.3.0/dist/quicklink.umd.js"></script>
+  <link href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism.css" rel="stylesheet">
+
+  
+
+
+  
+
+</head>
+
+<body>
+
+  <!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+  <div class="container">
+    <a class="navbar-brand" href='/'>My Blog</a>
+    <button class="navbar-toggler navbar-toggler-right" type="button" data-bs-toggle="collapse" data-bs-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+      Menu
+      <i class="fas fa-bars"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarResponsive">
+      <ul class="navbar-nav ms-auto">
+          <li class="nav-item">
+    <a class="nav-link" href="/posts">Posts</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link" href="/tags">Tags</a>
+  </li>
+
+      </ul>
+    </div>
+  </div>
+</nav>
+
+
+  <!-- Page Header -->
+  <header class="masthead" style="background-image: url(&quot;/posts/img/adam-avatar-final-trans-400.png&quot;)">
+  <div class="container position-relative">
+    <div class="row">
+      <div class="col-md-12">
+        <div class='post-heading'>
+          <h1>
+            Always use IEquatable&lt;T&gt; for Value Types
+          </h1>
+            <div class="meta">Published on Tuesday, January 21, 2020</div>
+              <div class="mt-3">
+                  <a href="/tags/c" class="badge text-bg-light"> C#</a>
+              </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+
+  <!-- Main Content -->
+  <div class="container">
+    <div class="row">
+      <div id="content" class="col-md-12">
+        <p>You should always implement <code>IEquatable&lt;T&gt;</code> when checking for equality on value types. In this article I'll go into a bit of depth on how <code>Equals()</code> behaves on <code>System.Object</code> and one of it's derived class, <code>System.ValueType</code>.</p>
+<blockquote>
+<p>Changes<br />
+[2020-1-28] Fixed some grammatical and spelling errors.</p>
+</blockquote>
+<blockquote>
+<p>Author's Note: There are a few 'broken' links in this article. If they are pointing to a non-existent article on my own site, I just haven't written it yet.  Please bear with me as I build out my articles.  I don't want to cover too much in any one post but there are important topics that would warrant an entire article.  Please keep checking back as I fill in the blanks!</p>
+</blockquote>
+<h1 id="the-root-of.net">The Root of .NET</h1>
+<p><code>System.Object</code> is the ultimate base class of all .NET classes. It provides several methods which can be useful.  I will at some point be covering all the methods of <code>System.Object</code> but this first article focuses on <code>Equals()</code> with specifically with Value Types.</p>
+<h1 id="value-types">Value Types</h1>
+<p>When working in .NET, we either have a reference type, or a value type.</p>
+<p>Value types are:</p>
+<ul>
+<li>Integral types:
+<ul>
+<li>byte</li>
+<li>int</li>
+<li>long</li>
+<li>etc.</li>
+</ul>
+</li>
+<li>Floating-point numeric types:
+<ul>
+<li>float</li>
+<li>double</li>
+<li>decimal</li>
+</ul>
+</li>
+<li>bool</li>
+<li>char</li>
+</ul>
+<p>All of these types that we commonly use in C# as keywords like <code>int</code> below, are actually aliases to a .NET type defined with the <code>struct</code> keyword</p>
+<pre><code class="language-cs">int number = 42;
+</code></pre>
+<blockquote>
+<p>Note: Ever wonder why 42 is always used in example code? In Douglas Adams' book, <em>The Hitchhiker's Guide to the Galaxy</em> a super computer was constructed to answer the meaning of life. At the end of it's magnificent calculations the computer responded. &quot;The answer to the ultimate question of life, the universe and everything is 42.&quot;</p>
+</blockquote>
+<p>Value Types derive from <code>System.ValueType</code> which like all objects in .NET derive from <code>System.Object</code>. The <code>ValueType</code> type provides overrides to the <code>object.Equals()</code> method which are better suited to compare value types, but there's a catch.</p>
+<h1 id="valuetype-base-implementation-of-equals">ValueType base implementation of Equals</h1>
+<p>Unlike it's parent, the base implementation on <code>Equals()</code> on <code>System.ValueType</code> does check for value equality.</p>
+<p>Here's a snippet from mscorlib (just the part that I'm making a point about, check out the full source here: <a href="https://referencesource.microsoft.com/#mscorlib/system/valuetype.cs,915ba3e46633f948">Microsoft Resource Source</a></p>
+<pre><code class="language-cs">FieldInfo[] thisFields = thisType.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+
+for (int i=0; i&lt;thisFields.Length; i++) {
+    thisResult = ((RtFieldInfo)thisFields[i]).UnsafeGetValue(thisObj);
+    thatResult = ((RtFieldInfo)thisFields[i]).UnsafeGetValue(obj);
+    
+    if (thisResult == null) {
+        if (thatResult != null)
+            return false;
+    }
+    else
+    if (!thisResult.Equals(thatResult)) {
+        return false;
+    }
+}
+</code></pre>
+<p>As you can see, this override of <code>Equals()</code> is using some Reflection. Although <a href="#">Not all reflection is slow (Article pending)</a>, this call to <code>Type.GetFields()</code> can be quite costly. Since we own the type, we can and should override the <code>Equals()</code> method.</p>
+<blockquote>
+<p>If you're using a <code>struct</code> or value type over a <code>class</code> in an attempt to try and finaegle some performance gains, check out this article on <a href="#">Structs are not light-weight classes(Article pending)</a>.</p>
+</blockquote>
+<h1 id="dude-my-dad-owns-his-own-dealership">Dude, my dad owns his own dealership</h1>
+<p>In the below example <code>struct</code>, we're going OO model a vehicle for a automotive dealership. In this representation of a vehicle it's going to have a Make (Manufacturer), Model and Vehicle Identification Number (VIN) which is a unique serial number for a vehicle.</p>
+<pre><code>struct Vehicle
+{
+    public Vehicle(string make, string model, string vin)
+    {
+        Make = make;
+        Model = model;
+        Vin = vin;
+    }
+    public string Make { get; }
+    public string Model { get; }
+    public string Vin { get; }
+}
+</code></pre>
+<p>With this model the make and model really don't matter since we have a permanent unique identifier in the form of a VIN. So our <code>IEquatable&lt;T&gt;</code> implementation of <code>Equals(Vehicle other)</code> only cares about comparing one field by value. Where if we left .NET to it's own devices, it would check each non static property for value equality.</p>
+<p>This is the key point in why we should override the base implementation. It's not entirely about performance. <em><strong>We are the domain experts, and we know what makes our objects equal.</strong></em></p>
+<blockquote>
+<p><strong>Aside</strong>: Vehicle Identification Numbers are supposed to be permanent.  If someone takes a grinder to the VIN (as in, <code>Vin == null</code>), or there's a duplicate VIN because somone criminally swapped the VIN's, the best course of action is to have the application throw an exeption, and that's how this example will behave.  YMMV if your use-case is different. <strong>When in doubt, test it out</strong>.</p>
+</blockquote>
+<p>I'm going to opt-out of showing you what it looks like to override <code>System.ValueType.Equals()</code> by itself. It just isn't necessary to show the extra code required to null check and type check. Here's (almost) all the code.</p>
+<pre><code class="language-cs">struct Vehicle : IEquatable&lt;Vehicle&gt;
+{
+    public Vehicle(string make, string model, string vin)
+    {
+        Make = make;
+        Model = model;
+        Vin = vin;
+    }
+    public string Make { get; }
+    public string Model { get; }
+    public string Vin { get; }
+
+    public bool Equals(Vehicle other) =&gt;
+        string.Equals(Vin, other.Vin, StringComparison.OrdinalIgnoreCase);
+
+    public override bool Equals(object obj) =&gt;
+        obj is Vehicle v &amp;&amp; Equals(v);
+
+    public override int GetHashCode() =&gt; Vin.GetHashCode();
+}
+</code></pre>
+<h1 id="the-iequatable-implementation">The IEquatable<T> Implementation</h1>
+<pre><code class="language-cs">    public bool Equals(Vehicle other) =&gt;
+        string.Equals(Vin, other.Vin, StringComparison.OrdinalIgnoreCase);
+</code></pre>
+<p><code>IEquatable&lt;T&gt;</code> is only concerned that we implement this method, which is an overload of the <code>Equals()</code> that accepts a parameter of type <code>Vehicle</code>.</p>
+<p>Since the VIN is a string, and is case-insensitive, I'm making sure the string comparison is also case-insensitive.</p>
+<p>I've also deliberatly chose <code>OrdinalIgnoreCase</code> because a VIN is an ISO standard format and has no culture-sensitivity. We're not an exotic dealership so we don't have to deal with foreign cars that don't participate in ISO.</p>
+<p>Example: Calling the overload <code>Equals(Vehicle other)</code></p>
+<pre><code>    var cruiser1 = new Vehicle(&quot;Ford&quot;, &quot;Crown Victoria&quot;, &quot;P71-ABCDEF&quot;)
+    var cruiser2 = new Vehicle(&quot;Ford&quot;, &quot;Crown Victoria&quot;, &quot;P71-HIJKLM&quot;)
+    if (cruiser1.Equals(cruiser2))
+        Console.WriteLine(&quot;Vehicles Match&quot;);
+    else 
+        Console.WriteLine(&quot;Vehicles Do not match&quot;);
+
+//output : Vehicles Do not match
+</code></pre>
+<blockquote>
+<p>Fun Note: P71 is part of a VIN on Ford Crown Victoria vehicles which were issued as fleet vehicles for law enforcement. Commonly referred to as a <a href="https://en.wikipedia.org/wiki/Ford_Crown_Victoria_Police_Interceptor">Crown Victoria Police Interceptor</a>.</p>
+</blockquote>
+<h1 id="collections">Collections</h1>
+<p>No, this isn't about your late payment repossession.  You hopefully have more than one car in your dealership. Either waiting to be leased, sold, or brought one in for serice or trade-in.</p>
+<p>If we're going to have a collection for examples, a <code>HashTable&lt;Vehicle&gt;</code> or a <code>Dictionary&lt;Vehicle, Person&gt;</code> we will additionally want to make sure our type can be used in a collection.  This is one major reason <a href="https://docs.microsoft.com/en-us/dotnet/api/system.iequatable-1">MSDN</a> urges us to also override the base implementation of <code>Equals()</code> and <code>GetHashCode()</code> on our type if we implement <code>IEquatable&lt;T&gt;</code></p>
+<pre><code class="language-cs">    public override bool Equals(object obj) =&gt;
+        obj is Vehicle v &amp;&amp; Equals(v);
+
+    public override int GetHashCode() =&gt; Vin.GetHashCode();
+</code></pre>
+<p>The base implementation accepts and <code>object</code> as a parameter instead of a the <code>Vehicle</code> type we declared. I'm using the <code>is</code> keyword as a <a href="https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/is#type-pattern">type pattern</a> to check if the incoming <code>obj</code> can be converted to a <code>Vehicle</code>.  If it can't, it will return false.  If it can, it will assign the converted <code>obj</code> to the variable <code>v</code>, and pass that to our <code>IEquatable&lt;T&gt;</code> implementation.</p>
+<p>The <code>GetHashCode()</code> override must always be consistent with our <code>Equals()</code> override. Since we are only checking for equality on the unique VIN, I'm only returning <code>Vin.GetHashCode()</code>, which <code>System.String</code> knows how to do for me.</p>
+<h1 id="smooth-operator">Smooth operator</h1>
+<p>We've essentially completed our task. However, on the note of consistency, if we've gone through the trouble of implementing <code>IEquatable&lt;T&gt;</code>, overriding <code>GetHashCode</code> and <code>Equals()</code> properly then we should also properly override the <code>==</code> and <code>!=</code> operators.  I'm sure there are valid reasons not to do so, but not wanting to write more code is not one of them, and in my opinion YAGNI doesn't apply here.  If we've come this far I would consider overridding the operators, and we can remove them later if there's a valid reason to.</p>
+<pre><code class="language-cs">struct Vehicle : IEquatable&lt;Vehicle&gt;
+{
+    public Vehicle(string make, string model, string vin)
+    {
+        Make = make;
+        Model = model;
+        Vin = vin;
+    }
+    public string Make { get; }
+    public string Model { get; }
+    public string Vin { get; }
+
+    public bool Equals(Vehicle other) =&gt;
+        string.Equals(Vin, other.Vin, StringComparison.OrdinalIgnoreCase);
+
+    public override bool Equals(object obj) =&gt;
+        obj is Vehicle v &amp;&amp; Equals(v);
+
+    public override int GetHashCode() =&gt; Vin.GetHashCode();
+
+    public static bool operator==(Vehicle v1, Vehicle v2) =&gt;
+        v1.Equals(v2);
+    public static bool operator!=(Vehicle v1, Vehicle v2) =&gt;
+        !v1.Equals(v2);
+}
+</code></pre>
+<h1 id="spot-free-rinse">Spot free rinse</h1>
+<p>I know that was a long article for something that should be pretty simple. That's classic .NET for you. We covered the root of the object heirarchy, value types and some of the in's and out's of equality.  Most importantly I hope I made the point that we should always use <code>IEquatable&lt;T&gt;</code> on our value types. If you forget the rest of the article that's OK, just remember this bit: The main reason why we should define equality for our types, is because <em><strong>We are the domain experts, and we know what makes our types equal.</strong></em></p>
+<pre><code>Other articles referenced:
+Pending Article: Not all reflection is slow.
+Pending Article: struct's are not light-weight classes.
+Pending Article: What to think about when comparing strings.
+</code></pre>
+
+
+        
+
+      </div>
+    </div>
+  </div>
+
+  <hr>
+
+  <!-- Footer -->
+  <footer>
+  <div class="container">
+    <div class="row">
+      <div class="col-md-12 text-center">
+        <p class="copyright">Copyright &#xA9; 2023</p>
+
+        <ul class="list-inline text-center small">
+            <li class="list-inline-item">
+              <a href="/feed.rss"><i class="fa fa-rss"></i> RSS Feed</a>
+            </li>
+            <li class="list-inline-item">
+              <a href="/feed.atom"><i class="fa fa-rss"></i> Atom Feed</a>
+            </li>
+        </ul>
+        <br />
+        <div class="font-weight-bold small"><a href="https://statiq.dev">Generated by Statiq</a></div>
+      </div>
+    </div>
+  </div>
+</footer>
+
+
+  <!-- Scripts -->
+  <script src='/vendor/bootstrap/js/bootstrap.bundle.min.js'></script>
+  <script src='/vendor/startbootstrap-clean-blog/js/scripts.js'></script>
+  <script src='/js/clean-blog.js'></script>
+  
+
+  
+
+</body>
+
+</html>

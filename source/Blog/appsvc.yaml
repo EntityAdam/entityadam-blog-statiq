@@ -1,2 +1,2 @@
 version: 1
-pre-build: dotnet run
+post-build: dotnet run

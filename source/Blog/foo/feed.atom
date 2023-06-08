@@ -1,0 +1,915 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+	<id>/</id>
+	<title />
+	<link rel="self" href="/" />
+	<rights>Copyright © 2023</rights>
+	<updated>2023-06-08T15:21:02Z</updated>
+	<entry>
+		<id>/posts/2023-06-07-move-to-statiq</id>
+		<title>Relaunch</title>
+		<link href="/posts/2023-06-07-move-to-statiq" />
+		<link rel="enclosure" type="image" href="/posts/img/adam-avatar-final-trans-400.png" />
+		<updated>2023-06-07T13:00:00Z</updated>
+		<content>&lt;p&gt;Relaunched like SpaceX. I'm just going to keep launching until something big happens. I've moved to a new static site generator based on .NET called Statiq.&lt;/p&gt;
+&lt;hr /&gt;
+&lt;h1 id="re-launch"&gt;Re-launch!&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;Changed static site generator from Jekyll to Statiq&lt;/li&gt;
+&lt;li&gt;Changed hosting from Azure Storage Account to Azure Static Web Apps&lt;/li&gt;
+&lt;li&gt;Changed CDN from Azure CDN to CloudFlare&lt;/li&gt;
+&lt;li&gt;Changed automatic build and deploy from Azure DevOps to Github&lt;/li&gt;
+&lt;/ul&gt;
+</content>
+		<summary>&lt;p&gt;Relaunched like SpaceX. I'm just going to keep launching until something big happens. I've moved to a new static site generator based on .NET called Statiq.&lt;/p&gt;</summary>
+	</entry>
+	<entry>
+		<id>/posts/2022-08-13-visual-studio-smart-line-break</id>
+		<title>Visual Studio Tips: Smart Line Break</title>
+		<link href="/posts/2022-08-13-visual-studio-smart-line-break" />
+		<link rel="enclosure" type="image" href="/posts/img/adam-avatar-final-trans-400.png" />
+		<updated>2022-08-13T23:00:00Z</updated>
+		<content>&lt;p&gt;A short productivity tip!&lt;/p&gt;
+&lt;hr /&gt;
+&lt;pre&gt;&lt;code class="language-cs"&gt;// type this
+public class Demo //[cursor]
+
+// press shift+enter
+
+public class Demo 
+{
+  //[cursor] curly brackets are entered, and cursor winds up here!
+}
+&lt;/code&gt;&lt;/pre&gt;
+</content>
+		<summary>&lt;p&gt;A short productivity tip!&lt;/p&gt;</summary>
+	</entry>
+	<entry>
+		<id>/posts/2020-09-26-azure-sql-managed-identity</id>
+		<title>Quick-Start: Connect ASP.NET to Azure SQL with an Azure managed identity</title>
+		<link href="/posts/2020-09-26-azure-sql-managed-identity" />
+		<link rel="enclosure" type="image" href="/posts/img/adam-avatar-final-trans-400.png" />
+		<updated>2020-09-26T23:00:00Z</updated>
+		<content>&lt;p&gt;Connect an ASP.NET Application running on Azure Web Apps to Azure SQL and leave no messy secrets laying about in the &lt;code&gt;web.config&lt;/code&gt; file, depending on Azure Key Vault, or have to orchestrate building a connection string with via Azure Resource Manager.&lt;/p&gt;
+&lt;h1 id="the-purpose"&gt;The purpose&lt;/h1&gt;
+&lt;p&gt;Of course you should learn everything about managed identities, Azure SQL, Azure Active Directory and Azure Web Apps, but seriously sometimes we don't have time to do all that reading and just need a quick-start. I'm providing a summary of just enough information to get it wired up but please do check out the relevant links. And here's a &lt;a href="https://github.com/EntityAdam/AspNetEfAzureSql/tree/master/AspNetEfAzureSql"&gt;link to the GitHub repo&lt;/a&gt;.&lt;/p&gt;
+&lt;h1 id="what-is-a-managed-identity"&gt;What is a managed identity?&lt;/h1&gt;
+&lt;p&gt;Managed identities was previously referred to as Managed Service Identity (MSI). In summary, managed identities in Azure are an Azure Active Directory feature that allows Azure resources to authenticate to any azure service that supports managed identities. If you'd like to dig deeper, Microsoft Docs provide a great &lt;a href="https://docs.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/overview"&gt;overview here.&lt;/a&gt;&lt;/p&gt;
+&lt;h1 id="quick-start"&gt;Quick Start&lt;/h1&gt;
+&lt;h2 id="overview"&gt;Overview&lt;/h2&gt;
+&lt;ol&gt;
+&lt;li&gt;Provisioning Azure Resources
+&lt;ol&gt;
+&lt;li&gt;Resource Group&lt;/li&gt;
+&lt;li&gt;App Service Plan&lt;/li&gt;
+&lt;li&gt;App Service&lt;/li&gt;
+&lt;li&gt;Azure Sql Server&lt;/li&gt;
+&lt;li&gt;Azure Sql Database&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/li&gt;
+&lt;li&gt;Configuring Azure Resources
+&lt;ol&gt;
+&lt;li&gt;Flip the App Service &lt;code&gt;Identity&lt;/code&gt; on&lt;/li&gt;
+&lt;li&gt;Add a Sql Server Admin&lt;/li&gt;
+&lt;li&gt;Allow the App Service's identity to access the Azure Sql Database&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/li&gt;
+&lt;li&gt;The ASP.NET Application
+&lt;ol&gt;
+&lt;li&gt;Add dependencies to the application&lt;/li&gt;
+&lt;li&gt;Configure the application&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h1 id="provisioning-azure-resources"&gt;1. Provisioning Azure Resources&lt;/h1&gt;
+&lt;p&gt;Just a bit of Powershell to get the resources up an running. The result will be:&lt;/p&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;Resource&lt;/th&gt;
+&lt;th&gt;Name&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;Resource Group&lt;/td&gt;
+&lt;td&gt;ISBORKED919-RG&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;App Service Plan&lt;/td&gt;
+&lt;td&gt;ISBORKED919-ASP&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;App Service&lt;/td&gt;
+&lt;td&gt;isborked919&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;Azure Sql Server&lt;/td&gt;
+&lt;td&gt;isborked919sql&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;Azure Sql Database&lt;/td&gt;
+&lt;td&gt;isborked919&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;blockquote&gt;
+&lt;p&gt;These resources need to be globally unique! If you'd like to try this out on your own Azure Subscription, you may need to change &lt;code&gt;$app&lt;/code&gt; variable.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;pre&gt;&lt;code class="language-s"&gt;# login
+az login
+
+# variables
+$app = "isborked919"
+$location = "eastus"
+$sqlAdminUser = $app + "sqladmin"
+$sqlAdminPass = "&amp;lt;generate a password&amp;gt;"
+
+# create resrouce group
+$group = (az group create -l $location -n ($app.ToUpper() + "-RG")|ConvertFrom-Json)
+
+# create app service plan with the free tier
+$plan = (az appservice plan create -g $group.name -l $location  -n ($app.ToUpper() + "-ASP") --sku FREE|ConvertFrom-Json)
+
+# create app service
+az webapp create -g $group.name -p $plan.name -n $app.ToLower()
+
+# create the sql server
+$server = (az sql server create -l $location -g $group.name -n ($app.ToLower() + "sql") -u $sqlAdminUser -p $sqlAdminPassword|ConvertFrom-Json)
+
+# create the sql database
+az sql db create -g $group.name -s $server.name -n $app
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h1 id="configuring-the-azure-resources"&gt;2. Configuring the Azure Resources&lt;/h1&gt;
+&lt;h2 id="app-service"&gt;App Service&lt;/h2&gt;
+&lt;p&gt;Navigate to the App Service and in the menu, we're looking for the &lt;code&gt;Identity&lt;/code&gt; blade. Flip the &lt;code&gt;Status&lt;/code&gt; switch to 'On', click save and accept the dialog to register the managed identity on Azure Active Directory.&lt;/p&gt;
+&lt;p&gt;&lt;img src="/img/posts/20200926-002-app-svc-identity-on.png" alt="alt text" title="Azure App Service Menu"&gt;&lt;/p&gt;
+&lt;h2 id="sql-server"&gt;Sql Server&lt;/h2&gt;
+&lt;p&gt;Enable Active Directory admin.  In the overview, you'll notice that the Active Directory admin is listed as not configured. Click on the &lt;code&gt;Not configured&lt;/code&gt; link. Use the 'Set Admin' button to choose an existing Azure AD account that you will use as the Sql Server Admin.&lt;/p&gt;
+&lt;p&gt;&lt;img src="/img/posts/20200926-003-sql-server-ad-admin-not-configured.png" alt="alt text" title="Azure Sql Server Overview"&gt;&lt;/p&gt;
+&lt;h2 id="sql-database"&gt;Sql Database&lt;/h2&gt;
+&lt;p&gt;There's some instructions on how to set this up through the Azure Cloud Shell but I found it was simpler just to use Sql Server Management Studio (SSMS). We can connect to the database as the Azure Active Directory Admin by selecting the appropriate AD login method. I used &lt;code&gt;Azure Active Directory - Universal with MFA&lt;/code&gt; because everyone should have MFA enabled.&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;On first attempt there will be a prompt to add our client IP address to the networking configuration of the SQL Server, since by default it is less secure without additional configuration, Azure locks access down by client IP address.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;Once we're connected to Azure SQL via SSMS, we can create a user for our app. When you open a new query editor the &lt;code&gt;master&lt;/code&gt; table will be selected. Switch to our database name, in this case &lt;code&gt;isborked919&lt;/code&gt;. We'll issue the following command to create a user with a username that is the app service name.&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-sql"&gt;CREATE USER [isborked919] FROM EXTERNAL PROVIDER;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Now, since we're using Entity Framework and the application was scaffolded as code first, EF needs to be able to create tables so we'll simply assign the new user to the &lt;code&gt;db_owner&lt;/code&gt; role.&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-sql"&gt;EXEC sp_addrolemember 'db_owner', 'isborked919';  
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Now our web app's managed identity is mapped to the Azure SQL database. On to the application.&lt;/p&gt;
+&lt;h1 id="the-application"&gt;3. The Application&lt;/h1&gt;
+&lt;p&gt;The application is nothing special. It's slightly less useful than a todo app. You can clone it and try it yourself, or just look at the important bits in the &lt;code&gt;web.config&lt;/code&gt; file.&lt;/p&gt;
+&lt;p&gt;It has one model, and an associated &lt;code&gt;Controller&lt;/code&gt; and an Entity Framework &lt;code&gt;DbContext&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;The key (see what I did there?) takeaway is that in the &lt;code&gt;web.config&lt;/code&gt; file where the application gets the connection string from, doesn't have a password in it. When this application is running on the App Service, it will use the app service's managed identity to authenticate to Azure Sql.&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-xml"&gt;&amp;lt;connectionStrings&amp;gt;
+   &amp;lt;add name="BorkContext" connectionString="Server=tcp:isborked.database.windows.net,1433;database=ISBORKED;UID=ISBORKED;Authentication=Active Directory Interactive" providerName="System.Data.SqlClient" /&amp;gt;
+&amp;lt;/connectionStrings&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h2 id="add-dependencies-to-the-application"&gt;Add dependencies to the application&lt;/h2&gt;
+&lt;p&gt;To get this to all work together, we'll need &lt;em&gt;something&lt;/em&gt; that knows how to interact with Azure Active Directory.  For ASP.NET this is pretty simple because all we need is a &lt;a href="https://www.nuget.org/packages/Microsoft.Azure.Services.AppAuthentication"&gt;Nuget package from the Azure SDK&lt;/a&gt;.&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-s"&gt;Install-Package Install-Package Microsoft.Azure.Services.AppAuthentication -Version 1.5.0
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;To use this package, we'll need to add it to our &lt;code&gt;web.config&lt;/code&gt;.  First we'll provide a &lt;code&gt;&amp;lt;configSection&amp;gt;&lt;/code&gt; to let the &lt;code&gt;System.Data.SqlClient&lt;/code&gt; know that we want it to use a specific authentication provider, and then plug in the assembly as a provider.&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Entity Framework uses &lt;code&gt;System.Data.SqlClient&lt;/code&gt; when communicating to Sql Server, however it can be configured to use other providers like Oracle, Sql Lite, Postgres, etc.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;pre&gt;&lt;code class="language-xml"&gt;&amp;lt;configSections&amp;gt;
+   &amp;lt;!-- Let SqlClient know that we're specifying an authentication provider --&amp;gt;
+   &amp;lt;section name="SqlAuthenticationProviders" type="System.Data.SqlClient.SqlAuthenticationProviderConfigurationSection, System.Data, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" /&amp;gt;
+&amp;lt;/configSections&amp;gt;
+
+And again, plug in the `AppAuthentication` assembly in as an authentication provider
+```xml
+&amp;lt;SqlAuthenticationProviders&amp;gt;
+   &amp;lt;providers&amp;gt;
+      &amp;lt;add name="Active Directory Interactive" type="Microsoft.Azure.Services.AppAuthentication.SqlAppAuthenticationProvider, Microsoft.Azure.Services.AppAuthentication" /&amp;gt;
+   &amp;lt;/providers&amp;gt;
+&amp;lt;/SqlAuthenticationProviders&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Happy hacking!&lt;/p&gt;
+&lt;p&gt;Resources:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://docs.microsoft.com/en-us/azure/azure-sql/database/authentication-aad-overview"&gt;https://docs.microsoft.com/en-us/azure/azure-sql/database/authentication-aad-overview&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://docs.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/tutorial-windows-vm-access-sql"&gt;https://docs.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/tutorial-windows-vm-access-sql&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://github.com/EntityAdam/AspNetEfAzureSql/tree/master/AspNetEfAzureSql"&gt;https://github.com/EntityAdam/AspNetEfAzureSql/tree/master/AspNetEfAzureSql&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+</content>
+		<summary>&lt;p&gt;Connect an ASP.NET Application running on Azure Web Apps to Azure SQL and leave no messy secrets laying about in the &lt;code&gt;web.config&lt;/code&gt; file, depending on Azure Key Vault, or have to orchestrate building a connection string with via Azure Resource Manager.&lt;/p&gt;</summary>
+	</entry>
+	<entry>
+		<id>/posts/2020-04-21-getting-started-debugger-display</id>
+		<title>Visual Studio Tricks: Increase signal to noise in your debugger</title>
+		<link href="/posts/2020-04-21-getting-started-debugger-display" />
+		<link rel="enclosure" type="image" href="/posts/img/adam-avatar-final-trans-400.png" />
+		<updated>2020-04-21T03:00:00Z</updated>
+		<content>&lt;p&gt;Inspecting your objects in Visual Studio's debugger can sometimes be tedious having to expand objects, arrays and lists trying to find that 'problem child' of yours. Fortunately for us, there are some handy tricks to reducing the noise, and focusing in on the members of your object that are important.&lt;/p&gt;
+&lt;h1 id="the-demo-code"&gt;The demo code&lt;/h1&gt;
+&lt;p&gt;For demonstration purposes, we have a slimmed down &lt;code&gt;Person&lt;/code&gt; type with &lt;code&gt;Age&lt;/code&gt;, &lt;code&gt;Name&lt;/code&gt;, &lt;code&gt;Nickname&lt;/code&gt; and and a list of addresses in the form of &lt;code&gt;List&amp;lt;Address&amp;gt;&lt;/code&gt;. The &lt;code&gt;Address&lt;/code&gt; object has strings for &lt;code&gt;State&lt;/code&gt;, &lt;code&gt;City&lt;/code&gt; and &lt;code&gt;PostalCode&lt;/code&gt;, as well as an &lt;code&gt;enum&lt;/code&gt; so we can tell if the address is a physical, mailing or work address.&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-cs"&gt;internal class Person
+{
+    public int Age { get; set; }
+    public string Name { get; set; }
+    public string Nickname { get; set; }
+    public List&amp;lt;Address&amp;gt; Addresses { get; set; }
+}
+
+internal class Address
+{
+    public AddressType AddressType { get; set; }
+    public string State { get; set; }
+    public string City { get; set; }
+    public string PostalCode { get; set; }
+}
+
+enum AddressType
+{
+    Physical,
+    Mailing,
+    Work
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h1 id="drilling-down-into-complex-objects-or-lists-of-object-can-be-painful"&gt;Drilling down into complex objects or lists of object can be painful.&lt;/h1&gt;
+&lt;p&gt;When we have a list with a bunch of people, the list contains a bunch of &lt;code&gt;{DebuggerDisplayDemo.Person}&lt;/code&gt; which isn't really informative. If you need to discern which &lt;code&gt;Person&lt;/code&gt; is causing a particular issue or are looking for a specific person you might be clicking a lot of little expand arrows to get to what you're looking for.  This is what it looks like when we inspect the variable&lt;/p&gt;
+&lt;p&gt;&lt;img src="/img/posts/20200421-001-debugger-list-of-people.png" alt="alt text" title="Debugger List of People"&gt;&lt;/p&gt;
+&lt;h1 id="bring-the-important-stuff-to-the-forefront"&gt;Bring the important stuff to the forefront&lt;/h1&gt;
+&lt;p&gt;An easy way to increase our signal to noise ratio is to leverage the &lt;code&gt;DebuggerDisplay&lt;/code&gt; attribute.&lt;/p&gt;
+&lt;h2 id="the-person-object"&gt;The Person Object&lt;/h2&gt;
+&lt;pre&gt;&lt;code class="language-cs"&gt;[DebuggerDisplay("Name = {Name}, Age = {Age}")]
+internal class Person
+{
+    public int Age { get; set; }
+    public string Name { get; set; }
+    public string Nickname { get; set; }
+    public List&amp;lt;Address&amp;gt; Addresses { get; set; }
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;By adding the &lt;code&gt;DebuggerDisplay&lt;/code&gt; attribute, we can now pass in an interpolated string which can access properties of the object. Now instead of simply displaying the type name of &lt;code&gt;{DebuggerDisplayDemo.Person}&lt;/code&gt; we now can see the properties of each person without having to drill down another level.&lt;/p&gt;
+&lt;p&gt;&lt;img src="/img/posts/20200421-002-debugger-list-of-people.png" alt="alt text" title="Debugger List of People"&gt;&lt;/p&gt;
+&lt;h2 id="the-address-object"&gt;The Address Object&lt;/h2&gt;
+&lt;p&gt;We can do the same thing to the &lt;code&gt;Address&lt;/code&gt; type to bubble the important information up. The nice thing is you can format an address appropriate for your culture. Shown here is the U.S. format of &lt;code&gt;State, City Zip&lt;/code&gt;.  (Yes, we call it a zip code instead of a postal code, but I generally always code it as PostalCode)&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-cs"&gt;[DebuggerDisplay("{AddressType}: {City}, {State} {PostalCode}")]
+internal class Address
+{
+    public AddressType AddressType { get; set; }
+    public string State { get; set; }
+    public string City { get; set; }
+    public string PostalCode { get; set; }
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h1 id="bring-the-contents-of-an-array-or-list-forward"&gt;Bring the contents of an array or list forward&lt;/h1&gt;
+&lt;p&gt;So far we've made some good improvements and now when inspecting our objects we get more information at first glance.  We can still take this a step further with the &lt;code&gt;Addresses&lt;/code&gt; property which is a list of complex &lt;code&gt;Address&lt;/code&gt; objects. If we drill down into a &lt;code&gt;Person&lt;/code&gt; object, the debugger by default only shows us the &lt;code&gt;Count&lt;/code&gt; with the number of items in the list.&lt;/p&gt;
+&lt;p&gt;&lt;img src="/img/posts/20200421-001-debugger-list-of-addresses.png" alt="alt text" title="Debugger List of Addresses"&gt;&lt;/p&gt;
+&lt;h2 id="debuggerbrowsablestate.roothidden"&gt;DebuggerBrowsableState.RootHidden&lt;/h2&gt;
+&lt;p&gt;We can improve this by using the &lt;code&gt;DebuggerBrowsable&lt;/code&gt; attribute hiding the root object, in this case the &lt;code&gt;List&lt;/code&gt; itself, which will bring the lists content to the forefront. Also, not only is the contents of the list shown, it's also showing us the format we specified in the previous step!&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-cs"&gt;[DebuggerDisplay("Name = {Name}, Age = {Age}")]
+internal class Person
+{
+    public int Age { get; set; }
+    public string Name { get; set; }
+    public string Nickname { get; set; }
+
+    [DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
+    public List&amp;lt;Address&amp;gt; Addresses { get; set; }
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h2 id="debuggerbrowsablestate.never"&gt;DebuggerBrowsableState.Never&lt;/h2&gt;
+&lt;p&gt;The other thing the &lt;code&gt;DebuggerBrowsable&lt;/code&gt; attribute can do is to set the BrowsableState to &lt;code&gt;DebuggerBrowsableState.Never&lt;/code&gt; which will hide it from the debugger to further decrease noise. As an example, the &lt;code&gt;Nickname&lt;/code&gt; property is completely useless in our debugging experience and we can hide it.&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-cs"&gt;[DebuggerDisplay("Name = {Name}, Age = {Age}")]
+internal class Person
+{
+    public int Age { get; set; }
+    public string Name { get; set; }
+
+    [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+    public string Nickname { get; set; }
+
+    [DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
+    public List&amp;lt;Address&amp;gt; Addresses { get; set; }
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Which cleans up our debugger display a little bit to this&lt;/p&gt;
+&lt;p&gt;&lt;img src="/img/posts/20200421-001-person-without-nickname.png" alt="alt text" title="Debugger Person without nickname"&gt;&lt;/p&gt;
+&lt;p&gt;Hiding this one property isn't a huge deal in this case, but I'm sure you can imagine how this could clean up the noise for an object with tons of properties.&lt;/p&gt;
+&lt;h1 id="fin"&gt;Fin.&lt;/h1&gt;
+&lt;p&gt;I've covered a few things in this article, the &lt;code&gt;DebuggerDisplay&lt;/code&gt; attribute as well as the &lt;code&gt;DebuggerBrowsable&lt;/code&gt; attribute.  I wanted to highlight the most useful bits of tailoring the debugger display and object inspector to get the most bang for your buck.  I didn't go into a great deal of depth, but if you want to dive a little deeper here is the reference &lt;a href="http://localhost:4000/c%23/2020/04/21/getting-started-debugger-display/"&gt;Microsoft Docs&lt;/a&gt; link&lt;/p&gt;
+</content>
+		<summary>&lt;p&gt;Inspecting your objects in Visual Studio's debugger can sometimes be tedious having to expand objects, arrays and lists trying to find that 'problem child' of yours. Fortunately for us, there are some handy tricks to reducing the noise, and focusing in on the members of your object that are important.&lt;/p&gt;</summary>
+	</entry>
+	<entry>
+		<id>/posts/2020-01-30-restrict-your-team-from-using-certain-classes</id>
+		<title>Restrict the use of certain Attributes</title>
+		<link href="/posts/2020-01-30-restrict-your-team-from-using-certain-classes" />
+		<link rel="enclosure" type="image" href="/posts/img/adam-avatar-final-trans-400.png" />
+		<updated>2020-01-30T12:00:00Z</updated>
+		<content>&lt;p&gt;This is one of those 'take it or leave it' answers to an interesting question,&amp;quot;How to restrict the use of certain Attributes?&amp;quot;&lt;/p&gt;
+&lt;h1 id="an-interesting-question"&gt;An interesting question&lt;/h1&gt;
+&lt;p&gt;A developer asked the following question:&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Anyone know of a mechanism to enforce that certain Annotations are not used?
+I’m building my EF core code-first model and would like to enforce that &lt;code&gt;[DatabaseGenerated]&lt;/code&gt; is not used in the model.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;With a little bit of duck duck luck, I found something relevant on StackOverFlow and adapted it to their purpose, and added some access modifiers.&lt;/p&gt;
+&lt;p&gt;This is what I came up with.&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-cs"&gt;[Obsolete(&amp;quot;Do not use!&amp;quot;, true)]
+internal sealed class DatabaseGeneratedAttribute : System.ComponentModel.DataAnnotations.Schema.DatabaseGeneratedAttribute
+{
+    public DatabaseGeneratedAttribute(DatabaseGeneratedOption databaseGeneratedOption) : base(databaseGeneratedOption)
+    {
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;So, we're basically deriving our own class from the class we want to restrict other developers from using.&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;It's tagged with the &lt;code&gt;ObsoleteAttribute&lt;/code&gt; so it causes a compiler build error.&lt;/li&gt;
+&lt;li&gt;It's &lt;code&gt;internal&lt;/code&gt; so it should be contained to this single assembly where it's being used.&lt;/li&gt;
+&lt;li&gt;It's marked as &lt;code&gt;sealed&lt;/code&gt; so it can't be further sub-classed.&lt;/li&gt;
+&lt;li&gt;It has no implementation, so hopefully it's clear that it's not to be used.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h1 id="thoughts"&gt;Thoughts&lt;/h1&gt;
+&lt;p&gt;It was good enough for the developer who asked, but since this code is 'clever', I'm reluctant to recommend it.  However it was an interesting question and it is way easier than writing a Roslyn Analyzer.&lt;/p&gt;
+&lt;p&gt;It's interesting because If you're part of a team and hopefully have agreed on some design practice, how can you keep you and your team 'honest' and not allow certain things that your team has agreed on?&lt;/p&gt;
+&lt;p&gt;This is probably a decent use-case, because Entity Framework Core (EF Core) models certainly do have a habit of becoming littered with &lt;code&gt;DataAnnotations&lt;/code&gt;. And IMO, usually unnecessarily if you have it in your power to stick with the &lt;a href="https://www.learnentityframeworkcore.com/conventions"&gt;EF Core conventions&lt;/a&gt;.&lt;/p&gt;
+</content>
+		<summary>&lt;p&gt;This is one of those 'take it or leave it' answers to an interesting question,&amp;quot;How to restrict the use of certain Attributes?&amp;quot;&lt;/p&gt;</summary>
+	</entry>
+	<entry>
+		<id>/posts/2020-01-21-value-types-iequatable</id>
+		<title>Always use IEquatable&lt;T&gt; for Value Types</title>
+		<link href="/posts/2020-01-21-value-types-iequatable" />
+		<link rel="enclosure" type="image" href="/posts/img/adam-avatar-final-trans-400.png" />
+		<updated>2020-01-21T02:00:00Z</updated>
+		<content>&lt;p&gt;You should always implement &lt;code&gt;IEquatable&amp;lt;T&amp;gt;&lt;/code&gt; when checking for equality on value types. In this article I'll go into a bit of depth on how &lt;code&gt;Equals()&lt;/code&gt; behaves on &lt;code&gt;System.Object&lt;/code&gt; and one of it's derived class, &lt;code&gt;System.ValueType&lt;/code&gt;.&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Changes&lt;br&gt;
+[2020-1-28] Fixed some grammatical and spelling errors.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Author's Note: There are a few 'broken' links in this article. If they are pointing to a non-existent article on my own site, I just haven't written it yet.  Please bear with me as I build out my articles.  I don't want to cover too much in any one post but there are important topics that would warrant an entire article.  Please keep checking back as I fill in the blanks!&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h1 id="the-root-of.net"&gt;The Root of .NET&lt;/h1&gt;
+&lt;p&gt;&lt;code&gt;System.Object&lt;/code&gt; is the ultimate base class of all .NET classes. It provides several methods which can be useful.  I will at some point be covering all the methods of &lt;code&gt;System.Object&lt;/code&gt; but this first article focuses on &lt;code&gt;Equals()&lt;/code&gt; with specifically with Value Types.&lt;/p&gt;
+&lt;h1 id="value-types"&gt;Value Types&lt;/h1&gt;
+&lt;p&gt;When working in .NET, we either have a reference type, or a value type.&lt;/p&gt;
+&lt;p&gt;Value types are:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Integral types:
+&lt;ul&gt;
+&lt;li&gt;byte&lt;/li&gt;
+&lt;li&gt;int&lt;/li&gt;
+&lt;li&gt;long&lt;/li&gt;
+&lt;li&gt;etc.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;Floating-point numeric types:
+&lt;ul&gt;
+&lt;li&gt;float&lt;/li&gt;
+&lt;li&gt;double&lt;/li&gt;
+&lt;li&gt;decimal&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;bool&lt;/li&gt;
+&lt;li&gt;char&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;All of these types that we commonly use in C# as keywords like &lt;code&gt;int&lt;/code&gt; below, are actually aliases to a .NET type defined with the &lt;code&gt;struct&lt;/code&gt; keyword&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-cs"&gt;int number = 42;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Note: Ever wonder why 42 is always used in example code? In Douglas Adams' book, &lt;em&gt;The Hitchhiker's Guide to the Galaxy&lt;/em&gt; a super computer was constructed to answer the meaning of life. At the end of it's magnificent calculations the computer responded. "The answer to the ultimate question of life, the universe and everything is 42."&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;Value Types derive from &lt;code&gt;System.ValueType&lt;/code&gt; which like all objects in .NET derive from &lt;code&gt;System.Object&lt;/code&gt;. The &lt;code&gt;ValueType&lt;/code&gt; type provides overrides to the &lt;code&gt;object.Equals()&lt;/code&gt; method which are better suited to compare value types, but there's a catch.&lt;/p&gt;
+&lt;h1 id="valuetype-base-implementation-of-equals"&gt;ValueType base implementation of Equals&lt;/h1&gt;
+&lt;p&gt;Unlike it's parent, the base implementation on &lt;code&gt;Equals()&lt;/code&gt; on &lt;code&gt;System.ValueType&lt;/code&gt; does check for value equality.&lt;/p&gt;
+&lt;p&gt;Here's a snippet from mscorlib (just the part that I'm making a point about, check out the full source here: &lt;a href="https://referencesource.microsoft.com/#mscorlib/system/valuetype.cs,915ba3e46633f948"&gt;Microsoft Resource Source&lt;/a&gt;&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-cs"&gt;FieldInfo[] thisFields = thisType.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+
+for (int i=0; i&amp;lt;thisFields.Length; i++) {
+    thisResult = ((RtFieldInfo)thisFields[i]).UnsafeGetValue(thisObj);
+    thatResult = ((RtFieldInfo)thisFields[i]).UnsafeGetValue(obj);
+    
+    if (thisResult == null) {
+        if (thatResult != null)
+            return false;
+    }
+    else
+    if (!thisResult.Equals(thatResult)) {
+        return false;
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;As you can see, this override of &lt;code&gt;Equals()&lt;/code&gt; is using some Reflection. Although &lt;a href="/#"&gt;Not all reflection is slow (Article pending)&lt;/a&gt;, this call to &lt;code&gt;Type.GetFields()&lt;/code&gt; can be quite costly. Since we own the type, we can and should override the &lt;code&gt;Equals()&lt;/code&gt; method.&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;If you're using a &lt;code&gt;struct&lt;/code&gt; or value type over a &lt;code&gt;class&lt;/code&gt; in an attempt to try and finaegle some performance gains, check out this article on &lt;a href="/#"&gt;Structs are not light-weight classes(Article pending)&lt;/a&gt;.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h1 id="dude-my-dad-owns-his-own-dealership"&gt;Dude, my dad owns his own dealership&lt;/h1&gt;
+&lt;p&gt;In the below example &lt;code&gt;struct&lt;/code&gt;, we're going OO model a vehicle for a automotive dealership. In this representation of a vehicle it's going to have a Make (Manufacturer), Model and Vehicle Identification Number (VIN) which is a unique serial number for a vehicle.&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;struct Vehicle
+{
+    public Vehicle(string make, string model, string vin)
+    {
+        Make = make;
+        Model = model;
+        Vin = vin;
+    }
+    public string Make { get; }
+    public string Model { get; }
+    public string Vin { get; }
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;With this model the make and model really don't matter since we have a permanent unique identifier in the form of a VIN. So our &lt;code&gt;IEquatable&amp;lt;T&amp;gt;&lt;/code&gt; implementation of &lt;code&gt;Equals(Vehicle other)&lt;/code&gt; only cares about comparing one field by value. Where if we left .NET to it's own devices, it would check each non static property for value equality.&lt;/p&gt;
+&lt;p&gt;This is the key point in why we should override the base implementation. It's not entirely about performance. &lt;em&gt;&lt;strong&gt;We are the domain experts, and we know what makes our objects equal.&lt;/strong&gt;&lt;/em&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;Aside&lt;/strong&gt;: Vehicle Identification Numbers are supposed to be permanent.  If someone takes a grinder to the VIN (as in, &lt;code&gt;Vin == null&lt;/code&gt;), or there's a duplicate VIN because somone criminally swapped the VIN's, the best course of action is to have the application throw an exeption, and that's how this example will behave.  YMMV if your use-case is different. &lt;strong&gt;When in doubt, test it out&lt;/strong&gt;.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;I'm going to opt-out of showing you what it looks like to override &lt;code&gt;System.ValueType.Equals()&lt;/code&gt; by itself. It just isn't necessary to show the extra code required to null check and type check. Here's (almost) all the code.&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-cs"&gt;struct Vehicle : IEquatable&amp;lt;Vehicle&amp;gt;
+{
+    public Vehicle(string make, string model, string vin)
+    {
+        Make = make;
+        Model = model;
+        Vin = vin;
+    }
+    public string Make { get; }
+    public string Model { get; }
+    public string Vin { get; }
+
+    public bool Equals(Vehicle other) =&amp;gt;
+        string.Equals(Vin, other.Vin, StringComparison.OrdinalIgnoreCase);
+
+    public override bool Equals(object obj) =&amp;gt;
+        obj is Vehicle v &amp;amp;&amp;amp; Equals(v);
+
+    public override int GetHashCode() =&amp;gt; Vin.GetHashCode();
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h1 id="the-iequatable-implementation"&gt;The IEquatable&lt;t&gt; Implementation&lt;/t&gt;&lt;/h1&gt;
+&lt;pre&gt;&lt;code class="language-cs"&gt;    public bool Equals(Vehicle other) =&amp;gt;
+        string.Equals(Vin, other.Vin, StringComparison.OrdinalIgnoreCase);
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;code&gt;IEquatable&amp;lt;T&amp;gt;&lt;/code&gt; is only concerned that we implement this method, which is an overload of the &lt;code&gt;Equals()&lt;/code&gt; that accepts a parameter of type &lt;code&gt;Vehicle&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;Since the VIN is a string, and is case-insensitive, I'm making sure the string comparison is also case-insensitive.&lt;/p&gt;
+&lt;p&gt;I've also deliberatly chose &lt;code&gt;OrdinalIgnoreCase&lt;/code&gt; because a VIN is an ISO standard format and has no culture-sensitivity. We're not an exotic dealership so we don't have to deal with foreign cars that don't participate in ISO.&lt;/p&gt;
+&lt;p&gt;Example: Calling the overload &lt;code&gt;Equals(Vehicle other)&lt;/code&gt;&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;    var cruiser1 = new Vehicle("Ford", "Crown Victoria", "P71-ABCDEF")
+    var cruiser2 = new Vehicle("Ford", "Crown Victoria", "P71-HIJKLM")
+    if (cruiser1.Equals(cruiser2))
+        Console.WriteLine("Vehicles Match");
+    else 
+        Console.WriteLine("Vehicles Do not match");
+
+//output : Vehicles Do not match
+&lt;/code&gt;&lt;/pre&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Fun Note: P71 is part of a VIN on Ford Crown Victoria vehicles which were issued as fleet vehicles for law enforcement. Commonly referred to as a &lt;a href="https://en.wikipedia.org/wiki/Ford_Crown_Victoria_Police_Interceptor"&gt;Crown Victoria Police Interceptor&lt;/a&gt;.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h1 id="collections"&gt;Collections&lt;/h1&gt;
+&lt;p&gt;No, this isn't about your late payment repossession.  You hopefully have more than one car in your dealership. Either waiting to be leased, sold, or brought one in for serice or trade-in.&lt;/p&gt;
+&lt;p&gt;If we're going to have a collection for examples, a &lt;code&gt;HashTable&amp;lt;Vehicle&amp;gt;&lt;/code&gt; or a &lt;code&gt;Dictionary&amp;lt;Vehicle, Person&amp;gt;&lt;/code&gt; we will additionally want to make sure our type can be used in a collection.  This is one major reason &lt;a href="https://docs.microsoft.com/en-us/dotnet/api/system.iequatable-1"&gt;MSDN&lt;/a&gt; urges us to also override the base implementation of &lt;code&gt;Equals()&lt;/code&gt; and &lt;code&gt;GetHashCode()&lt;/code&gt; on our type if we implement &lt;code&gt;IEquatable&amp;lt;T&amp;gt;&lt;/code&gt;&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-cs"&gt;    public override bool Equals(object obj) =&amp;gt;
+        obj is Vehicle v &amp;amp;&amp;amp; Equals(v);
+
+    public override int GetHashCode() =&amp;gt; Vin.GetHashCode();
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;The base implementation accepts and &lt;code&gt;object&lt;/code&gt; as a parameter instead of a the &lt;code&gt;Vehicle&lt;/code&gt; type we declared. I'm using the &lt;code&gt;is&lt;/code&gt; keyword as a &lt;a href="https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/is#type-pattern"&gt;type pattern&lt;/a&gt; to check if the incoming &lt;code&gt;obj&lt;/code&gt; can be converted to a &lt;code&gt;Vehicle&lt;/code&gt;.  If it can't, it will return false.  If it can, it will assign the converted &lt;code&gt;obj&lt;/code&gt; to the variable &lt;code&gt;v&lt;/code&gt;, and pass that to our &lt;code&gt;IEquatable&amp;lt;T&amp;gt;&lt;/code&gt; implementation.&lt;/p&gt;
+&lt;p&gt;The &lt;code&gt;GetHashCode()&lt;/code&gt; override must always be consistent with our &lt;code&gt;Equals()&lt;/code&gt; override. Since we are only checking for equality on the unique VIN, I'm only returning &lt;code&gt;Vin.GetHashCode()&lt;/code&gt;, which &lt;code&gt;System.String&lt;/code&gt; knows how to do for me.&lt;/p&gt;
+&lt;h1 id="smooth-operator"&gt;Smooth operator&lt;/h1&gt;
+&lt;p&gt;We've essentially completed our task. However, on the note of consistency, if we've gone through the trouble of implementing &lt;code&gt;IEquatable&amp;lt;T&amp;gt;&lt;/code&gt;, overriding &lt;code&gt;GetHashCode&lt;/code&gt; and &lt;code&gt;Equals()&lt;/code&gt; properly then we should also properly override the &lt;code&gt;==&lt;/code&gt; and &lt;code&gt;!=&lt;/code&gt; operators.  I'm sure there are valid reasons not to do so, but not wanting to write more code is not one of them, and in my opinion YAGNI doesn't apply here.  If we've come this far I would consider overridding the operators, and we can remove them later if there's a valid reason to.&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-cs"&gt;struct Vehicle : IEquatable&amp;lt;Vehicle&amp;gt;
+{
+    public Vehicle(string make, string model, string vin)
+    {
+        Make = make;
+        Model = model;
+        Vin = vin;
+    }
+    public string Make { get; }
+    public string Model { get; }
+    public string Vin { get; }
+
+    public bool Equals(Vehicle other) =&amp;gt;
+        string.Equals(Vin, other.Vin, StringComparison.OrdinalIgnoreCase);
+
+    public override bool Equals(object obj) =&amp;gt;
+        obj is Vehicle v &amp;amp;&amp;amp; Equals(v);
+
+    public override int GetHashCode() =&amp;gt; Vin.GetHashCode();
+
+    public static bool operator==(Vehicle v1, Vehicle v2) =&amp;gt;
+        v1.Equals(v2);
+    public static bool operator!=(Vehicle v1, Vehicle v2) =&amp;gt;
+        !v1.Equals(v2);
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h1 id="spot-free-rinse"&gt;Spot free rinse&lt;/h1&gt;
+&lt;p&gt;I know that was a long article for something that should be pretty simple. That's classic .NET for you. We covered the root of the object heirarchy, value types and some of the in's and out's of equality.  Most importantly I hope I made the point that we should always use &lt;code&gt;IEquatable&amp;lt;T&amp;gt;&lt;/code&gt; on our value types. If you forget the rest of the article that's OK, just remember this bit: The main reason why we should define equality for our types, is because &lt;em&gt;&lt;strong&gt;We are the domain experts, and we know what makes our types equal.&lt;/strong&gt;&lt;/em&gt;&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;Other articles referenced:
+Pending Article: Not all reflection is slow.
+Pending Article: struct's are not light-weight classes.
+Pending Article: What to think about when comparing strings.
+&lt;/code&gt;&lt;/pre&gt;
+</content>
+		<summary>&lt;p&gt;You should always implement &lt;code&gt;IEquatable&amp;lt;T&amp;gt;&lt;/code&gt; when checking for equality on value types. In this article I'll go into a bit of depth on how &lt;code&gt;Equals()&lt;/code&gt; behaves on &lt;code&gt;System.Object&lt;/code&gt; and one of it's derived class, &lt;code&gt;System.ValueType&lt;/code&gt;.&lt;/p&gt;</summary>
+	</entry>
+	<entry>
+		<id>/posts/2020-01-02-pc-setup</id>
+		<title>What I use for a developer machine</title>
+		<link href="/posts/2020-01-02-pc-setup" />
+		<link rel="enclosure" type="image" href="/posts/img/adam-avatar-final-trans-400.png" />
+		<updated>2020-01-01T06:00:00Z</updated>
+		<content>&lt;p&gt;I'm determined to work a little harder on my blog posts so I'm going to spin off a section of articles for the times when I can't bring myself to write new technical blogs. In this article, I'm going to briefly cover my current development laptop and why it was chosen when I bought it.&lt;/p&gt;
+&lt;h2 id="laptop"&gt;Laptop&lt;/h2&gt;
+&lt;p&gt;Asus ROG Strix GL503&lt;/p&gt;
+&lt;p&gt;&lt;a href="https://www.asus.com/us/Laptops/ROG-Strix-GL503/"&gt;View Product on Asus&lt;/a&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;Note:&lt;/strong&gt; The website says it comes with a Intel® Core™ i7 7700HQ, but mine has a Intel® Core™ i7 8750U. Idk what's up with that, but I wouldn't have bought it if it did have the 7700HQ.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3 id="why-did-i-chose-this-laptop"&gt;Why did I chose this laptop?&lt;/h3&gt;
+&lt;p&gt;TL;DR, I decided to sacrifice battery life for performance at a lower price.&lt;/p&gt;
+&lt;p&gt;The long story, I wanted a cheap dev machine because AMD had announced their next gen processors coming out with massive core / thread configurations, like 12 cores / 24 threads. If Intel jumps in on the action, well it's very likely I could be behind the power curve very quickly. I didn't want a dumpy machine though, so I looked at the popular Surface Book and Dell XPS laptops that were just released at the time and found an equivalently powered machine at a lower price.&lt;/p&gt;
+&lt;p&gt;The NVIDIA® GeForce® GTX 1050 isn't exactly OP for games, but for handling the Windows UI and offloading some GPU accelerated apps, it's just enough bang for the buck and it Windows remains responsive while building / debugging applications.&lt;/p&gt;
+&lt;p&gt;At the time (Nov, 2018), the laptops I was considering:&lt;/p&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;lappy&lt;/th&gt;
+&lt;th&gt;cpu&lt;/th&gt;
+&lt;th&gt;cores&lt;/th&gt;
+&lt;th&gt;threads&lt;/th&gt;
+&lt;th&gt;price&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;Asus ROG Strix GL503&lt;/td&gt;
+&lt;td&gt;i7-8750H&lt;/td&gt;
+&lt;td&gt;6&lt;/td&gt;
+&lt;td&gt;12&lt;/td&gt;
+&lt;td&gt;$999&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;Dell XPS 15&lt;/td&gt;
+&lt;td&gt;i7-8750H&lt;/td&gt;
+&lt;td&gt;6&lt;/td&gt;
+&lt;td&gt;12&lt;/td&gt;
+&lt;td&gt;$1323&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;Surface Book Pro&lt;/td&gt;
+&lt;td&gt;i7-8650U&lt;/td&gt;
+&lt;td&gt;4&lt;/td&gt;
+&lt;td&gt;8&lt;/td&gt;
+&lt;td&gt;$1899&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;Macbook Pro&lt;/td&gt;
+&lt;td&gt;PFFT&lt;/td&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;td&gt;Arm+Leg&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;The worst feature of the ASUS ROG? The battery life. I think runs for about 2 hours on a full charge. However, for my purposes it's just fine, as the I rarely need it on the go. It just follows me from office to office. I've got a kid and don't get to hang out with the cool people and mob program at a coffee shop.&lt;/p&gt;
+&lt;h3 id="upgrades"&gt;Upgrades&lt;/h3&gt;
+&lt;p&gt;There were a few configuration options, I got the cheap one with a 128GB PCIe SSD and instantly regretted it, 128GB is not enough to install Windows and a suite of development tools on.  If I wanted Windows Subsystem for Linux (WSL) I would have been out of luck. I Replaced the included 1TB hybrid drive with Samsung EVO 850 1TB (View on &lt;a href="https://www.newegg.com/samsung-850-evo-1tb/p/N82E16820147374?Description=Samsung%20EVO%20850%201TB&amp;amp;cm_re=Samsung_EVO_850_1TB-_-20-147-374-_-Product"&gt;Newegg.com&lt;/a&gt;), and split that into 2 volumes. Half for Windows, half for storage.  I don't 'store' things on my laptop really.  Cloud storage is cheap. I put my page file on the 128GB PCIe.&lt;/p&gt;
+&lt;p&gt;I also expanded the RAM to 32 GB with a pair of Corsair Vengeance 16GB modules (View on &lt;a href="https://www.newegg.com/corsair-32gb-260-pin-ddr4-so-dimm/p/N82E16820233989?Item=N82E16820233989"&gt;Newegg.com&lt;/a&gt;). Plenty of RAM to allocate a decent amount of RAM to Docker while still being able to have one or two Chrome tabs open.&lt;/p&gt;
+&lt;p&gt;While there is a door on the bottom of the laptop to get to the memory, in reality it's a pretty useless feature unless you're upgrading from a single 8GB stick to a single 16GB stick.  When you crack open the door, you get access to the single slot where factory installed RAM module is sitting. The second slot is on the exact other side of the motherboard, which means you need to disassemble the entire laptop to get at the second slot. Although the laptop came apart quite nicely and I even got the entire thing back together without any 'extra parts'.&lt;/p&gt;
+&lt;h2 id="monitors"&gt;Monitors&lt;/h2&gt;
+&lt;p&gt;2 x LG 29&amp;quot; IPS Ultrawide LG-29UM58-P&lt;/p&gt;
+&lt;p&gt;&lt;a href="https://www.lg.com/us/monitors/lg-29UM58-P-ultrawide-monitor"&gt;View Product on LG&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;I got these monitors used from a friend and were the right price at the right time. I don't really dig the 21:9 displays but they are far superior to what I had previously.  I am considering getting some kind of mounting device and trying to put the displays in portrait to get more developer-coveted vertical space. TL;DR&lt;/p&gt;
+</content>
+		<summary>&lt;p&gt;I'm determined to work a little harder on my blog posts so I'm going to spin off a section of articles for the times when I can't bring myself to write new technical blogs. In this article, I'm going to briefly cover my current development laptop and why it was chosen when I bought it.&lt;/p&gt;</summary>
+	</entry>
+	<entry>
+		<id>/posts/2019-12-31-new-theme</id>
+		<title>New theme!</title>
+		<link href="/posts/2019-12-31-new-theme" />
+		<link rel="enclosure" type="image" href="/posts/img/adam-avatar-final-trans-400.png" />
+		<updated>2019-12-31T10:20:00Z</updated>
+		<content>&lt;p&gt;In preparation for 2020 and ideally a slew of new articles, I've finally wired up a decent theme to this blog site.  I don't particularly enjoy front end work so it takes me a while to get a round tuit. I'm using the 'clean-bulma-theme' and it covers all the bases and looks nice.&lt;/p&gt;
+&lt;p&gt;It took quite a bit of fumbling to get it to work since I know nothing about Ruby and I haven't messed with the blog in many months so I needed a refresher on how to Jekyll. It appears it has a way to toss in Disqus as well and so if I have any angry readers yet, you'll be able to comment soon :)&lt;/p&gt;
+</content>
+		<summary>&lt;p&gt;In preparation for 2020 and ideally a slew of new articles, I've finally wired up a decent theme to this blog site.  I don't particularly enjoy front end work so it takes me a while to get a round tuit. I'm using the 'clean-bulma-theme' and it covers all the bases and looks nice.&lt;/p&gt;</summary>
+	</entry>
+	<entry>
+		<id>/posts/2019-04-20-blazor-mvvm</id>
+		<title>Server Side Blazor Code Re-Use using MVVM</title>
+		<link href="/posts/2019-04-20-blazor-mvvm" />
+		<link rel="enclosure" type="image" href="/posts/img/adam-avatar-final-trans-400.png" />
+		<updated>2019-04-20T13:00:00Z</updated>
+		<content>&lt;p&gt;While MVVM is not 'officially' supported in Blazor, MVVM after all is just a design pattern and I'm going to demonstrate that you can actually use the MVVM pattern with Blazor and potentially share or re-use some of the code with WPF or Xamarin Forms.&lt;/p&gt;
+&lt;h1 id="server-side-blazor-code-re-use-using-mvvm"&gt;Server Side Blazor Code Re-Use using MVVM&lt;/h1&gt;
+&lt;p&gt;Author: Adam Vincent&lt;/p&gt;
+&lt;p&gt;GitHub Repository: &lt;a href="https://github.com/EntityAdam/HappyStorage"&gt;HappyStorage&lt;/a&gt;&lt;/p&gt;
+&lt;h2 id="what-is-mvvm"&gt;What is MVVM?&lt;/h2&gt;
+&lt;p&gt;In a nutshell, MVVM is a design pattern derived from the Model-View-Presenter (MVP) pattern. The Model-View-Controller (MVC) pattern is also derived from MVP, but where MVC is suited to sit on top of a stateless HTTP protocol, MVVM is suited for user interface (UI) platforms with state and two way data binding.  MVVM is commonly implemented in Desktop (WPF / UWP), Web (Silverlight), and Mobile (Xamarin.Forms) applications.  Like the other frameworks, Blazor acts much like a Single Page Application (SPA) that has two way data binding, and can benefit from the MVVM pattern. So whether you have existing MVVM code in the form of a WPF or mobile application, or are starting green with new code you can leverage MVVM to re-use your existing code in Blazor, or share your code with other platforms respectively.&lt;/p&gt;
+&lt;p&gt;&lt;img src="/MVVMPattern.png" alt=""&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;More information on MVVM: &lt;a href="https://en.wikipedia.org/wiki/Model%E2%80%93view%E2%80%93viewmodel"&gt;Wikipedia&lt;/a&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;hr&gt;
+&lt;h2 id="example-presentation-layer"&gt;Example Presentation Layer&lt;/h2&gt;
+&lt;h3 id="bindablebase"&gt;BindableBase&lt;/h3&gt;
+&lt;p&gt;At the heart of MVVM is the &lt;code&gt;INotifyPropertyChanged&lt;/code&gt; interface which notifies clients that a property has changed. It is through this interface that converts a user interaction into your code being called. Usually, all ViewModels, and some Models will implement &lt;code&gt;INotifyPropertyChanged&lt;/code&gt; therefore, it is common to either use a library (Prism, MVVM Light, Caliburn) or create your own base class.  Here is a minimal implementation of INPC.&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-cs"&gt;public abstract class BindableBase : INotifyPropertyChanged
+{
+    protected bool SetField&amp;lt;T&amp;gt;(ref T field, T value, [CallerMemberName] string propertyName = null)
+    {
+        if (EqualityComparer&amp;lt;T&amp;gt;.Default.Equals(field, value)) return false;
+        field = value;
+        OnPropertyChanged(propertyName);
+        return true;
+    }
+
+    public event PropertyChangedEventHandler PropertyChanged;
+
+    protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
+    {
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;In this simplified model class which derives from &lt;code&gt;BindableBase&lt;/code&gt;, we have a &lt;code&gt;CustomerModel&lt;/code&gt; with a single property &lt;code&gt;FirstName&lt;/code&gt;.  In this context, we would probably have a Customer filling out an &lt;code&gt;&amp;lt;input&amp;gt;&lt;/code&gt; within a &lt;code&gt;&amp;lt;form&amp;gt;&lt;/code&gt; on a website where they must fill in their first name. This input would be bound to an instance of &lt;code&gt;CustomerModel&lt;/code&gt;  on the ViewModel. While the customer is filling out the form since we are in a two way data binding scenario, each time the customer enters or removes a character from the forms input box, &lt;code&gt;SetField()&lt;/code&gt; is called and will cause the &lt;code&gt;PropertyChanged&lt;/code&gt; event to fire.&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-cs"&gt;public class NewCustomerModel : BindableBase
+{
+    private string firstName;
+    
+    public string FirstName
+    {
+        get =&amp;gt; firstName;
+        set
+        {
+            SetField(ref firstName, value);
+        }
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;More:&lt;/strong&gt; If you need to know more about &lt;code&gt;INotifyPropertyChanged&lt;/code&gt; the &lt;a href="https://docs.microsoft.com/en-us/dotnet/api/system.componentmodel.inotifypropertychanged?view=netframework-4.8"&gt;Microsoft Docs&lt;/a&gt; cover this topic very well.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3 id="model"&gt;Model&lt;/h3&gt;
+&lt;p&gt;With &lt;code&gt;INotifyPropertyChanged&lt;/code&gt; out of the way, here is the entire presentation model.&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-cs"&gt;public class NewCustomerModel : BindableBase
+{
+    [Display(Name = "Customer Number")]
+    public string CustomerNumber { get; set; }
+
+    [Display(Name = "Full Name")]
+    public string FullName =&amp;gt; $"{FirstName} {LastName}";
+
+    private string firstName;
+    [Required]
+    [Display(Name = "First Name")]
+    public string FirstName
+    {
+        get =&amp;gt; firstName;
+        set
+        {
+            SetField(ref firstName, value);
+            OnPropertyChanged(nameof(FullName));
+        }
+    }
+
+    private string lastName;
+    [Required]
+    [Display(Name = "Last Name")]
+    public string LastName
+    {
+        get =&amp;gt; lastName;
+        set
+        {
+            SetField(ref lastName, value);
+            OnPropertyChanged(nameof(FullName));
+        }
+    }
+
+    [Display(Name = "Address")]
+    public string Address =&amp;gt; $"{Street}, {City}, {State} {PostalCode}";
+
+    private string street;
+
+    [Required]
+    [Display(Name = "Street Address")]
+    public string Street
+    {
+        get =&amp;gt; street;
+        set
+        {
+            SetField(ref street, value);
+            OnPropertyChanged(nameof(Address));
+        }
+    }
+    private string city;
+
+    [Required]
+    [Display(Name = "City")]
+    public string City
+    {
+        get =&amp;gt; city;
+        set
+        {
+            SetField(ref city, value);
+            OnPropertyChanged(nameof(Address));
+        }
+    }
+    private string state;
+
+    [Required]
+    [Display(Name = "State")]
+    public string State
+    {
+        get =&amp;gt; state;
+        set
+        {
+            SetField(ref state, value);
+            OnPropertyChanged(nameof(Address));
+        }
+    }
+    private string postalCode;
+
+    [Required]
+    [Display(Name = "Zip Code")]
+    public string PostalCode
+    {
+        get =&amp;gt; postalCode;
+        set
+        {
+            SetField(ref postalCode, value);
+            OnPropertyChanged(nameof(Address));
+        }
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;There's a few things to point out in this presentation model. First, please note the use of the &lt;strong&gt;Data Annotation&lt;/strong&gt; attribute such as &lt;code&gt;[Required]&lt;/code&gt;.  You can decorate your properties to provide rich form validation feedback to your users. When the customer is filling out a form and misses a required field it will not pass the model validation and prevent the form from being submitted as well as provide an error message if configured. We will cover this more in the &lt;strong&gt;View&lt;/strong&gt; section&lt;/p&gt;
+&lt;p&gt;The next thing I wanted to point out is I've covered &lt;code&gt;SetField()&lt;/code&gt; in the INotifyPropertyChanged section, but there is an additional bit of complexity.&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-cs"&gt;[Display(Name = "Full Name")]
+public string FullName =&amp;gt; $"{FirstName} {LastName}";
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Note that the &lt;code&gt;FullName&lt;/code&gt; property is a &lt;code&gt;{ get; }&lt;/code&gt; only concatenation of the customers first and last name.  Since we are forcing the customer to fill out first and last name in separate form field, changing either the first or last name causes the &lt;code&gt;FullName&lt;/code&gt; to change.  We want the ViewModel to be informed of these changes to &lt;code&gt;FullName&lt;/code&gt;.&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-cs"&gt;private string firstName;
+[Required]
+[Display(Name = "First Name")]
+public string FirstName
+{
+    get =&amp;gt; firstName;
+    set
+    {
+        SetField(ref firstName, value);
+        OnPropertyChanged(nameof(FullName));
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;After the &lt;code&gt;SetField()&lt;/code&gt; is invoked in the base class, there is an additional call to &lt;code&gt;OnPropertyChanged()&lt;/code&gt;, which let's the ViewModel know that in addition to &lt;code&gt;FirstName&lt;/code&gt; changing, &lt;code&gt;FullName&lt;/code&gt; has also changed.&lt;/p&gt;
+&lt;h3 id="example-viewmodel-interface"&gt;Example ViewModel Interface&lt;/h3&gt;
+&lt;p&gt;The example ViewModel below will expand on the above model, we'll be using a simplified user story of creating a new customer.&lt;/p&gt;
+&lt;p&gt;Blazor supports .NET Core's dependency injection out of the box, which makes makes injecting a ViewModel very simple.  In the following ViewModel interface, we'll need our concrete class to have an instance of &lt;code&gt;NewCustomer&lt;/code&gt; as well as a method which knows how to create a new customer.&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-cs"&gt;public interface ICustomerCreateViewModel
+{
+    NewCustomerModel NewCustomer { get; set; }
+    void Create();
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;And the concrete implementation of &lt;code&gt;ICustomerCreateViewModel&lt;/code&gt;&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-cs"&gt;public class CustomerCreateViewModel : ICustomerCreateViewModel
+{
+    private readonly ICustomerService _customerService;
+
+    public CustomerCreateViewModel(ICustomerService customerService)
+    {
+        _customerService = customerService;
+    }
+
+    public NewCustomerModel NewCustomer { get; set; } = new NewCustomerModel();
+
+    public void Create()
+    {
+        //map presentation model to the data layer entity
+        var customer = new NewCustomer()
+        {
+            CustomerNumber = Guid.NewGuid().ToString().Split('-')[0],
+            FullName = $"{newCustomer.FirstName} {NewCustomer.LastName}",
+            Address = $"{newCustomer.Address}, {NewCustomer.City}, {newCustomer.State} {NewCustomer.PostalCode}"
+        };
+
+        //create
+        _customerService.AddNewCustomer(customer);
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h3 id="viewmodel-deep-dive"&gt;ViewModel Deep-Dive&lt;/h3&gt;
+&lt;p&gt;In the constructor we're getting an instance of our &lt;code&gt;ICustomerService&lt;/code&gt; which knows how to create new customers when provided the data layer entity called &lt;code&gt;NewCustomer&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;I need to point out that &lt;code&gt;NewCustomer&lt;/code&gt; and &lt;code&gt;NewCustomerModel&lt;/code&gt; serve two different purposes.  &lt;code&gt;NewCustomer&lt;/code&gt; is the data entity, and is a simple POCO. The data entity is the item that is persisted. Of note, in this example, we save the customers full name as a single column in a database, but on the form backed by the presentation model, we actually want the customer to fill out 'First Name' and 'Last Name'&lt;/p&gt;
+&lt;p&gt;In the ViewModel, the &lt;code&gt;Create()&lt;/code&gt; method shows how a &lt;code&gt;NewCustomerModel&lt;/code&gt; is mapped to a &lt;code&gt;NewCustomer&lt;/code&gt;.  There are some tools that are very good at doing this type of mapping (like AutoMapper), but for this example the amount of code to map between the types is trivial. For reference, here is the data entity.&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-cs"&gt;public class NewCustomer
+{
+	public string CustomerNumber { get; set; }
+	public string FullName { get; set; }
+	public string Address { get; set; }
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;Opinionated Note:&lt;/strong&gt; Presentation models and data entities should be separated into their respective layers.  It is possible to create a single &lt;code&gt;CustomerModel&lt;/code&gt; and use it for both presentation and data layers to reduce code duplication, but I highly discourage this practice.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3 id="view"&gt;View&lt;/h3&gt;
+&lt;p&gt;The last and final piece to the MVVM pattern is the View.  The View in the context of Blazor is either a &lt;code&gt;Page&lt;/code&gt; or &lt;code&gt;Component&lt;/code&gt;, which is either a .razor file, or a .cshtml file and contains Razor code. Razor code is a mix of C# and HTML markup.  In the context of this article, our view will be a customer form that can be filled out, and a button that calls the ViewModel's &lt;code&gt;Create()&lt;/code&gt; method when the form has been filled out properly according to the validation rules.&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-cs"&gt;@page "/customer/create"
+@using HappyStorage.Common.Ui.Customers
+@using HappyStorage.BlazorWeb.Components
+@inject Microsoft.AspNetCore.Components.IUriHelper UriHelper
+@inject HappyStorage.Common.Ui.Customers.ICustomerCreateViewModel viewModel
+
+&amp;lt;h1&amp;gt;Create Customer&amp;lt;/h1&amp;gt;
+
+&amp;lt;EditForm Model="@viewModel.NewCustomer" OnValidSubmit="@HandleValidSubmit"&amp;gt;
+    &amp;lt;DataAnnotationsValidator /&amp;gt;
+    &amp;lt;ValidationSummary /&amp;gt;
+    &amp;lt;div class="form-group"&amp;gt;
+        &amp;lt;h3&amp;gt;Name&amp;lt;/h3&amp;gt;
+        &amp;lt;LabelComponent labelFor="@(() =&amp;gt; viewModel.NewCustomer.FirstName)" /&amp;gt;
+        &amp;lt;InputText class="form-control" bind-Value="@viewModel.NewCustomer.FirstName" /&amp;gt;
+
+        &amp;lt;LabelComponent labelFor="(() =&amp;gt; viewModel.NewCustomer.LastName)" /&amp;gt;
+        &amp;lt;InputText class="form-control" bind-Value="@viewModel.NewCustomer.LastName" /&amp;gt;
+    &amp;lt;/div&amp;gt;
+    &amp;lt;div class="form-group"&amp;gt;
+        &amp;lt;h3&amp;gt;Address&amp;lt;/h3&amp;gt;
+
+        &amp;lt;LabelComponent labelFor="@(() =&amp;gt; viewModel.NewCustomer.Street)" /&amp;gt;
+        &amp;lt;InputText class="form-control" bind-Value="@viewModel.NewCustomer.Street" /&amp;gt;
+
+        &amp;lt;LabelComponent labelFor="@(() =&amp;gt; viewModel.NewCustomer.City)" /&amp;gt;
+        &amp;lt;InputText class="form-control" bind-Value="@viewModel.NewCustomer.City" /&amp;gt;
+
+        &amp;lt;LabelComponent labelFor="@(() =&amp;gt; viewModel.NewCustomer.State)" /&amp;gt;
+        &amp;lt;InputText class="form-control" bind-Value="@viewModel.NewCustomer.State" /&amp;gt;
+
+        &amp;lt;LabelComponent labelFor="@(() =&amp;gt; viewModel.NewCustomer.PostalCode)" /&amp;gt;
+        &amp;lt;InputText class="form-control" bind-Value="@viewModel.NewCustomer.PostalCode" /&amp;gt;
+    &amp;lt;/div&amp;gt;
+    &amp;lt;br /&amp;gt;
+    &amp;lt;button class="btn btn-primary" type="submit"&amp;gt;Submit&amp;lt;/button&amp;gt;
+    &amp;lt;button class="btn" type="button" onclick="@ReturnToList"&amp;gt;Cancel&amp;lt;/button&amp;gt;
+&amp;lt;/EditForm&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;The first thing to note is at the top of the code, and this is how we use dependency injection to get an instance of our ViewModel.&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-cs"&gt;@inject HappyStorage.Common.Ui.Customers.ICustomerCreateViewModel viewModel
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Easy!  Next we need to create the form.  The EditForm needs an instance of a model to bind to, which is provided by the ViewModel already, and a method to call when the user submits a valid form.&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-cs"&gt;&amp;lt;EditForm Model="@viewModel.NewCustomer" OnValidSubmit="@HandleValidSubmit"&amp;gt;
+...
+&amp;lt;/EditForm&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Next we bind each property to their respective &lt;code&gt;&amp;lt;input&amp;gt;&lt;/code&gt;'s, Blazor has some built in &lt;code&gt;&amp;lt;Input***&amp;gt;&amp;lt;/Input***&amp;gt;&lt;/code&gt; helpers which help you accomplish the binding.  They are still under development and you may find some features are lacking at the time of writing. Please refer to the docs in the note below for more up to date info.&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;Note&lt;/strong&gt; the &lt;code&gt;&amp;lt;LabelComponent /&amp;gt;&lt;/code&gt; is something I've created as a replacement for the &lt;code&gt;asp-for&lt;/code&gt; tag-helper that retrieves the &lt;code&gt;DisplayAttribute&lt;/code&gt; from the presentation model classes. The code is available in the GitHub repository listed at the top.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;pre&gt;&lt;code class="language-cs"&gt;&amp;lt;LabelComponent labelFor="@(() =&amp;gt; viewModel.NewCustomer.FirstName)" /&amp;gt;
+&amp;lt;InputText class="form-control" bind-Value="@viewModel.NewCustomer.FirstName" /&amp;gt;
+
+&amp;lt;LabelComponent labelFor="(() =&amp;gt; viewModel.NewCustomer.LastName)" /&amp;gt;
+&amp;lt;InputText class="form-control" bind-Value="@viewModel.NewCustomer.LastName" /&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;The magic here is &lt;code&gt;bind-Value&lt;/code&gt; which binds our &lt;code&gt;&amp;lt;InputText /&amp;gt;&lt;/code&gt; text box to the value of the ViewModels instance of the &lt;code&gt;NewCustomerModel&lt;/code&gt; presentation model.&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;Note:&lt;/strong&gt; Full documentation on &lt;a href="https://docs.microsoft.com/en-us/aspnet/core/blazor/forms-validation?view=aspnetcore-3.0"&gt;Blazor Forms and Validation&lt;/a&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;Last but not least we'll need some code to call our ViewModel's &lt;code&gt;Create()&lt;/code&gt; method when the form is submitted and valid, as well as the &lt;code&gt;onclick=ReturnToList&lt;/code&gt; I've defined for the &lt;strong&gt;Cancel&lt;/strong&gt; button.&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-cs"&gt;@functions {
+    private void HandleValidSubmit()
+    {
+        viewModel.Create();
+        ReturnToList();
+    }
+
+    private void ReturnToList()
+    {
+        UriHelper.NavigateTo("/customers");
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h3 id="conclusion"&gt;Conclusion&lt;/h3&gt;
+&lt;p&gt;That's it! In summary, I've covered what MVVM is, how Blazor can benefit from it as well as an in depth look at a simple example of how we can create a form with validation and rich feed back to the user.  It is also important to reiterate that this example works not only in Blazor, but can be re-used in Windows Presentation Foundation (WPF) desktop applications as well as other platforms.  Please check out the &lt;a href="https://github.com/EntityAdam/HappyStorage"&gt;GitHub repository&lt;/a&gt; as I continue to develop and expand on this concept.&lt;/p&gt;
+</content>
+		<summary>&lt;p&gt;While MVVM is not 'officially' supported in Blazor, MVVM after all is just a design pattern and I'm going to demonstrate that you can actually use the MVVM pattern with Blazor and potentially share or re-use some of the code with WPF or Xamarin Forms.&lt;/p&gt;</summary>
+	</entry>
+	<entry>
+		<id>/posts/2019-04-04-launch</id>
+		<title>Launch</title>
+		<link href="/posts/2019-04-04-launch" />
+		<link rel="enclosure" type="image" href="/posts/img/adam-avatar-final-trans-400.png" />
+		<updated>2019-04-03T13:00:00Z</updated>
+		<content>&lt;p&gt;Welcome to my blog! It took me a while to find a low-overhead blog solution, but I believe this setup is what I'm finally going to go with.&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;The site is statically generated by Jekyll.&lt;/li&gt;
+&lt;li&gt;It is stored on Azure Blob Storage.&lt;/li&gt;
+&lt;li&gt;It is served through Azure Content Delivery Network.&lt;/li&gt;
+&lt;li&gt;The Jekyll build and deployment to blob storage is fully automated through Azure DevOps.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;What this effectively does. I only need to write a simple markdown file to draft a blog entry. When I complete the blog entry, I only need to issue one fire and forget command: &lt;code&gt;git push origin master&lt;/code&gt;. Once I issue the &lt;code&gt;git push&lt;/code&gt;, it triggers the build process which generates the site with my new markdown post. As soon as that is finished, the release pipeline takes the site and plops it on Azure Storage.  From there, the CDN does its thing and propagates my site globally. Having the site statically generated, coupled with the CDN that equates to very fast load times and global redundancy.&lt;/p&gt;
+</content>
+		<summary>&lt;p&gt;Welcome to my blog! It took me a while to find a low-overhead blog solution, but I believe this setup is what I'm finally going to go with.&lt;/p&gt;</summary>
+	</entry>
+</feed>

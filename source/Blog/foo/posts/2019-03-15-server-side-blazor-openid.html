@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+  <title>My Blog - Razor Components Authentication with Azure AD</title>
+
+  <link rel="canonical" href='/posts/2019-03-15-server-side-blazor-openid'>
+
+      <link type="application/rss+xml" rel="alternate" href="/feed.rss" />
+      <link type="application/atom+xml" rel="alternate" href="/feed.atom" />
+
+  <meta name="application-name" content='My Blog' />
+  <meta name="msapplication-tooltip" content='My Blog' />
+  <meta name="msapplication-starturl" content='/' />
+
+  <meta property="og:title" content='My Blog - Razor Components Authentication with Azure AD' />
+    <meta property="og:image" content='/posts/img/adam-avatar-final-trans-400.png' />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content='/posts/2019-03-15-server-side-blazor-openid' />
+
+  <link rel="icon" href='/favicon.ico'>
+
+  <!-- Custom fonts for this template -->
+  <link href='/vendor/fontawesome-free/css/all.min.css' rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic" rel="stylesheet" data-no-mirror>
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800" rel="stylesheet" data-no-mirror>
+
+  <!-- Styles for this template (also includes Bootstrap) -->
+  <link href='/scss/clean-blog.css' rel="stylesheet">
+
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js" data-no-mirror></script>
+  <script src="https://cdn.jsdelivr.net/npm/quicklink@2.3.0/dist/quicklink.umd.js"></script>
+  <link href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism.css" rel="stylesheet">
+
+  
+
+
+  
+
+</head>
+
+<body>
+
+  <!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+  <div class="container">
+    <a class="navbar-brand" href='/'>My Blog</a>
+    <button class="navbar-toggler navbar-toggler-right" type="button" data-bs-toggle="collapse" data-bs-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+      Menu
+      <i class="fas fa-bars"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarResponsive">
+      <ul class="navbar-nav ms-auto">
+          <li class="nav-item">
+    <a class="nav-link" href="/posts">Posts</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link" href="/tags">Tags</a>
+  </li>
+
+      </ul>
+    </div>
+  </div>
+</nav>
+
+
+  <!-- Page Header -->
+  <header class="masthead" style="background-image: url(&quot;/posts/img/adam-avatar-final-trans-400.png&quot;)">
+  <div class="container position-relative">
+    <div class="row">
+      <div class="col-md-12">
+        <div class='site-heading'>
+          <h1>
+            Razor Components Authentication with Azure AD
+          </h1>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+
+  <!-- Main Content -->
+  <div class="container">
+    <div class="row">
+      <div id="content" class="col-md-12">
+        <p><code>[Obsolete]</code> Getting started with Razor Components, Adding OpenID Connect Authentication.</p>
+<h1 id="overview">Overview</h1>
+<ol>
+<li>Azure Account (Not Covered)</li>
+<li>Azure Active Directory (Not Covered)</li>
+<li>Azure AD App Registration</li>
+<li>Scaffold Razor Components App</li>
+<li>Code Configuration</li>
+<li>Sign In / Sign Out Controller</li>
+<li>Razor Component</li>
+</ol>
+<hr />
+<h2 id="azure-ad-app-registration">3 Azure AD App Registration</h2>
+<p>Steps</p>
+<ul>
+<li>Sign into your Azure Portal and <code>navigate</code> to App Registrations or App Registrations (Preview)</li>
+<li>Create a new App Registration
+<ul>
+<li>Enter any name</li>
+<li>Choose supported account type (for this, I chose <em>Accounts in any organizational directory and personal Microsoft accounts (e.g. Skype, Xbox, Outlook.com)</em>)</li>
+<li>Enter your redirect uri, as <code>https://localhost:&lt;your ssl port&gt;/auth/signin-callback</code></li>
+</ul>
+</li>
+</ul>
+<blockquote>
+<p><strong>Note:</strong> you can find your SSL port in the <code>MyApp.Server</code> project properties, under the debug tab, or in your <code>launchsettings.json</code> file.</p>
+</blockquote>
+<blockquote>
+<p><strong>Note:</strong> You can name the Redirect Uri as anything you'd like, but it needs to match the call back uri provided to authentication provider. Also, you cannot have a controller handle this route or you will get a <code>Correlation</code> exception. Example: If you have a <code>SignIn()</code> method on <code>AuthController</code>, and specify a redirect uri of <code>/auth/signin/</code>, you will get an exception.</p>
+</blockquote>
+<hr />
+<h2 id="scaffold-razor-components-app">4 Scaffold Razor Components App</h2>
+<p>Using Visual Studio 2019 Preview you can create a new ASP.NET Core Web Application and simply choose the Razor Components template.</p>
+<hr />
+<h2 id="code-configuration">5 Code Configuration</h2>
+<h3 id="startup-class-constructor">5.1 Startup Class - Constructor</h3>
+<p>In the startup class, one of the first things I'm doing is creating a constructor to grab an instance of <code>IConfiguration</code> so we can retrieve our Azure AD configuration from the <code>appsetting.json</code> file</p>
+<pre><code class="language-cs">public class Startup
+{
+    public Startup(IConfiguration configuration)
+    {
+        Configuration = configuration;
+    }
+
+    public IConfiguration Configuration { get; }
+}
+</code></pre>
+<hr />
+<h3 id="startup-class-configureservices">5.2 Startup Class -&gt; ConfigureServices</h3>
+<p>Moving to the <code>ConfigureServices</code> method, we'll need to register the authentication provider with the <code>IServiceCollection</code></p>
+<h3 id="add-mvc-and-authentication">5.2.1 Add MVC and Authentication</h3>
+<pre><code class="language-cs">services.AddMvc();
+
+services.AddAuthentication();
+</code></pre>
+<h3 id="add-openid-connect">5.2.1 Add OpenID Connect</h3>
+<p>In this example, I'm going to use OpenID Connect so we'll tack that on to the builder.</p>
+<pre><code class="language-cs">services.AddAuthentication()
+    .AddOpenIdConnect(options =&gt;
+    {
+       //configure here
+    });
+</code></pre>
+<blockquote>
+<p><strong>What is OpenID Connect?</strong><br />
+More info here -&gt; <a href="https://openid.net/connect/">https://openid.net/connect/</a></p>
+</blockquote>
+<blockquote>
+<p><strong>NuGet Package:</strong> Microsoft.AspNetCore.Authentication.OpenIdConnect<br />
+Make sure you have the correct version installed, at the time of writing, I had to use the second to most recent which was <code>3.0.0-preview-19075-0444</code></p>
+</blockquote>
+<blockquote>
+<p><strong>MissingMethod Exception:</strong>
+If you get any exception complaining about a Missing Method, you've got a dependency version mismatch</p>
+</blockquote>
+<h3 id="configuring-openid-connect">5.2.2 Configuring OpenID Connect</h3>
+<p>This is where we tell OpenIdConnect about our Azure and since there are a lot of options I'm going to go with a very basic setup. If you need something different for your application, check out the Pluralsight course in the notes section below.</p>
+<pre><code class="language-cs">public void ConfigureServices(IServiceCollection services)
+{
+    services.AddAuthentication()
+        .AddOpenIdConnect(options =&gt;
+        {
+            options.Authority = Configuration.GetValue&lt;string&gt;(&quot;AzureOpenIdConnect:Authority&quot;);
+            options.ClientId = Configuration.GetValue&lt;string&gt;(&quot;AzureOpenIdConnect:ClientId&quot;);
+            //etc...
+        });
+}
+</code></pre>
+<p>Wait wait, that looks terrible.  Let's try binding our configuration instead. It's less cluttered and more idiomatic of .NET Core.</p>
+<pre><code class="language-cs">public void ConfigureServices(IServiceCollection services)
+{
+    services.AddAuthentication()
+            .AddOpenIdConnect(options =&gt; Configuration.Bind(&quot;AzureOpenIdConnect&quot;, options))
+}
+</code></pre>
+<p>And put all our options into <code>appsetting.json</code> like this</p>
+<pre><code class="language-json">{
+  &quot;AzureOpenIdConnect&quot;: {
+    &quot;Authority&quot;: &quot;https://login.microsoftonline.com/{yourdomain}.onmicrosoft.com&quot;,
+    &quot;ClientId&quot;: &quot;{{ your-client-id }}&quot;,
+    &quot;ResponseType&quot;: &quot;id_token&quot;,
+    &quot;CallbackPath&quot;: &quot;/auth/signin-callback&quot;
+  }
+}
+</code></pre>
+<h3 id="configuring-authentication">5.2.3 Configuring Authentication</h3>
+<p>This is where we tell <code>Authentication</code> which process to use to find out if a user is eligible to access the application.</p>
+<pre><code class="language-cs">services.AddAuthentication(options =&gt; {
+            //configure
+        })
+        .AddOpenIdConnect(options =&gt; Configuration.Bind(&quot;AzureOpenIdConnect&quot;, options));
+</code></pre>
+<p>I'm going to use simple <strong>Cookie Authentication</strong> in this example, and that looks like this:</p>
+<pre><code class="language-cs">services.AddAuthentication(options =&gt;
+        {
+            options.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
+            options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+            options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+        })
+        .AddOpenIdConnect(options =&gt; Configuration.Bind(&quot;AzureOpenIdConnect&quot;, options))
+        .AddCookie();
+</code></pre>
+<blockquote>
+<p><strong>Note:</strong>  Don't forget the <code>.AddCookie()</code>. But if you do, don't worry. You'll get a very friendly exception asking if you forgot it.</p>
+</blockquote>
+<blockquote>
+<p><strong>Note:</strong> If you need more info on configuring authentication, check out this <a href="https://app.pluralsight.com/library/courses/aspnet-core-identity-management-playbook/table-of-contents">Pluralsight course by Chris Klug</a></p>
+</blockquote>
+<h3 id="making-it-all-work-in-razor-components">5.2.4 Making it all work in Razor Components</h3>
+<p>The last thing we'll need is something a little bit funky that I'll try to summarize as best as I can. Blazor (Client Side) comes packed with Http stuff, but Razor Components out of the box doesn't have any Http stuff on the client app.  So, to be able access critical info from the client side, we'll need to expose the <code>HttpClient</code> and the <code>HttpContextAccessor</code> from the server side to get any information about the currently logged in user.</p>
+<p>So, still in the <code>ConfigureServices</code> method, we need to add</p>
+<pre><code class="language-cs">services.AddHttpContextAccessor();
+services.AddScoped&lt;HttpContextAccessor&gt;();
+services.AddHttpClient();
+services.AddScoped&lt;HttpClient&gt;();
+</code></pre>
+<h3 id="startup-configure">5.3 Startup -&gt; Configure()</h3>
+<p>Now everything is registered with the <code>ServiceCollection</code> and configured, but don't forget to <code>.Use()</code> them!</p>
+<p>In the <code>Configure()</code> method of the <code>Startup</code> class, we'll need to add these things to our <code>AppBuilder</code>, in a specific order.</p>
+<p><code>UseAuthentication()</code> should be after <code>UseStaticFiles()</code> and before <code>UseMvcWithDefaultRoute()</code></p>
+<pre><code class="language-cs">public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+{
+    if (env.IsDevelopment())
+    {
+        app.UseDeveloperExceptionPage();
+    }
+
+    app.UseStaticFiles();
+    app.UseAuthentication();
+    app.UseMvcWithDefaultRoute();
+    app.UseRazorComponents&lt;App.Startup&gt;();
+}
+</code></pre>
+<hr />
+<h3 id="sign-in-sign-out-controller">6 Sign In / Sign Out Controller</h3>
+<p>Next, we need a controller in our <code>ProjectName.Server</code> project to handle our sign in and sign out.  This step is actually not required if using the <strong>AzureAD.UI NuGet Package</strong> (Not Covered) because it actually creates a virtual controller which handles this stuff for you.  But since I'm not a big fan of using automagical things without knowing what's going on under the hood, I'm sharing the OpenIdConnect method first.</p>
+<pre><code class="language-cs">[Route(&quot;auth&quot;)]
+public class AuthController : Controller
+{
+    [Route(&quot;signin&quot;)]
+    public IActionResult SignIn(string returnUrl = null)
+    {
+        return Challenge(new AuthenticationProperties { RedirectUri = returnUrl ?? &quot;/&quot; });
+    }
+
+    [HttpPost]
+    [Route(&quot;signout&quot;)]
+    public async Task SignOut()
+    {
+        await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+        await HttpContext.SignOutAsync(OpenIdConnectDefaults.AuthenticationScheme);
+    }
+}
+</code></pre>
+<p>Nothing too fancy here.  There are a few takeaways though.  If you don't pass in the <code>RedirectUri</code> into the <code>Challenge</code>, you'll catch your self in an infinite loop. Don't do it. Next, it's important in the sign out feature to not only log your users out of the app, but also out of the authentication provider, or else people will lose their minds when they find out they were not actually signed out.  Also, in ensuring your users are logged out of their authentication provider, you're not responsible for returning a redirect <code>ActionResult</code>, the service will log you out and return the user to your site (and you can even tell it where, by specifying a <em>Post Logout</em> uri in the configuration)</p>
+<hr />
+<h2 id="razor-component">7 Razor Component</h2>
+<p>Next, we'll need an actual Razor Component! Under pages, I created a new Component named <code>LoginControl</code>, and here's the code. (Apologies about the syntax highlighting, not supported yet.)</p>
+<pre><code class="language-text">&#64;using System.Security.Claims
+&#64;using Microsoft.AspNetCore.Http
+&#64;page &quot;/login&quot;
+&#64;inject HttpClient Http
+&#64;inject HttpContextAccessor _httpContextAccessor
+
+&#64;if (User.Identity.Name != null)
+{
+    &lt;b&gt;You are logged in as: &#64;GivenName&lt;/b&gt;
+    &#64;*&lt;a class=&quot;ml-md-auto btn btn-primary&quot;
+        href=&quot;/auth/signout?post_logout_redirect_uri=&#64;RedirectUri&quot;
+        target=&quot;_top&quot;&gt;Logout&lt;/a&gt;*&#64;
+    &lt;form class=&quot;ml-md-auto&quot; method=&quot;post&quot; action=&quot;/auth/signout&quot;&gt;
+        &lt;input class=&quot;btn btn-primary&quot; type=&quot;submit&quot; value=&quot;Sign Out&quot; /&gt;
+    &lt;/form&gt;
+}
+else
+{
+    &lt;a class=&quot;ml-md-auto btn btn-primary&quot;
+       href=&quot;/auth/signin?redirectUri=&#64;RedirectUri&quot;
+       target=&quot;_top&quot;&gt;Login&lt;/a&gt;
+}
+&#64;functions {
+    private ClaimsPrincipal User;
+    private string RedirectUri;
+    private string GivenName;
+    protected override void OnInit()
+    {
+        base.OnInit();
+        try
+        {
+            // Set the user to determine if they are logged in
+            User = _httpContextAccessor.HttpContext.User;
+            // Try to get the GivenName
+            var givenName =
+                _httpContextAccessor.HttpContext.User
+                .FindFirst(ClaimTypes.GivenName);
+            if (givenName != null)
+            {
+                GivenName = givenName.Value;
+            }
+            else
+            {
+                GivenName = User.Identity.Name;
+            }
+            // Need to determine where we are to set the RedirectUri
+            RedirectUri =
+                _httpContextAccessor.HttpContext.Request.Host.Value;
+        }
+        catch { }
+    }
+}
+</code></pre>
+<p>So at the top you can see we're injecting <code>HttpClient</code> and <code>HttpContextAccessor</code> which I stated during the last portion of <code>ConfigureServices</code> that is what gives us access to retrieve the currently logged in user (<code>ClaimsPrincipal</code>) from the HttpContext of the Server.</p>
+<p>Lastly, we'll just consume the <code>LoginControl</code> from the main layout component.</p>
+<p>So under <code>/Shared/MainLayout.cshtml</code> you should have</p>
+<pre><code class="language-text">&#64;inherits LayoutComponentBase
+
+&lt;div class=&quot;sidebar&quot;&gt;
+    &lt;NavMenu /&gt;
+&lt;/div&gt;
+
+&lt;div class=&quot;main&quot;&gt;
+    &lt;div class=&quot;top-row px-4&quot;&gt;
+        &lt;LoginControl /&gt;
+    &lt;/div&gt;
+
+    &lt;div class=&quot;content px-4&quot;&gt;
+        &#64;Body
+    &lt;/div&gt;
+&lt;/div&gt;
+</code></pre>
+<h1 id="azuread.ui">AzureAD.UI</h1>
+<blockquote>
+<p><em>Microsoft.AspNetCore.Authentication.AzureAD.UI</em></p>
+</blockquote>
+<p><em>Coming Soon..</em></p>
+
+        
+
+      </div>
+    </div>
+  </div>
+
+  <hr>
+
+  <!-- Footer -->
+  <footer>
+  <div class="container">
+    <div class="row">
+      <div class="col-md-12 text-center">
+        <p class="copyright">Copyright &#xA9; 2023</p>
+
+        <ul class="list-inline text-center small">
+            <li class="list-inline-item">
+              <a href="/feed.rss"><i class="fa fa-rss"></i> RSS Feed</a>
+            </li>
+            <li class="list-inline-item">
+              <a href="/feed.atom"><i class="fa fa-rss"></i> Atom Feed</a>
+            </li>
+        </ul>
+        <br />
+        <div class="font-weight-bold small"><a href="https://statiq.dev">Generated by Statiq</a></div>
+      </div>
+    </div>
+  </div>
+</footer>
+
+
+  <!-- Scripts -->
+  <script src='/vendor/bootstrap/js/bootstrap.bundle.min.js'></script>
+  <script src='/vendor/startbootstrap-clean-blog/js/scripts.js'></script>
+  <script src='/js/clean-blog.js'></script>
+  
+
+  
+
+</body>
+
+</html>
