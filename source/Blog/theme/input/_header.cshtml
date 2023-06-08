@@ -9,7 +9,7 @@
   else
   {
     mastheadClass="masthead";
-    mastheadStyle = $"background-image: url(\"{Context.GetLink(image)}\")";
+    mastheadStyle = $"background-image: url(\"{Context.GetLink(image)}\"); background-size: 400px 400px";
   }
   string description = Document.WithoutSettings().GetString("Lead") ?? Document.WithoutSettings().GetString(WebKeys.Description);
   string title = Document.GetString("Title") ?? Document.GetString("SiteTitle");
