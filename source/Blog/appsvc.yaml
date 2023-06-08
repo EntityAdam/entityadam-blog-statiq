@@ -1,0 +1,5 @@
+version: 1
+
+pre-build: dotnet build
+
+post-build: dotnet run
