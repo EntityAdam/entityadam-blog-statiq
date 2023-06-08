@@ -19,8 +19,10 @@ jobs:
       - uses: actions/setup-dotnet@v3
         with:
           dotnet-version: 7.0.x
-      - run: dotnet build 
+      - run: dotnet build
+        working-directory: ./source/Blog
       - run: dotnet run
+        working-directory: ./source/Blog
       - name: Build And Deploy
         id: builddeploy
         uses: Azure/static-web-apps-deploy@v1

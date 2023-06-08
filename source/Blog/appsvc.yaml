@@ -1,2 +1,0 @@
-version: 1
-post-build: dotnet run
