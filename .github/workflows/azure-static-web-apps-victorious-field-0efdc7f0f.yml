@@ -26,6 +26,7 @@ jobs:
           app_location: "source/Blog"
           api_location: "source/api"
           output_location: "output"
+          skip_app_build: true
   close_pull_request_job:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
     runs-on: ubuntu-latest
