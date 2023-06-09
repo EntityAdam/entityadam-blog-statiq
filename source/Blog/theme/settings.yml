@@ -14,3 +14,7 @@ IsPost: => Context.Outputs.FilterSources(Context.GetString("PostSources")).Conta
 PageSources: pages/**/*
 IsPage: => Context.Outputs.FilterSources(Context.GetString("PageSources")).ContainsById(Document)
 Layout: /_layout.cshtml
+CommentEngine: giscus
+GiscusRepoName: entityadam-blog-statiq
+GiscusRepoId: R_kgDOJs8iVw
+GiscusCategoryId: DIC_kwDOJs8iV84CXEtD
