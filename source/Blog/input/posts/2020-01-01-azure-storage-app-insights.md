@@ -64,8 +64,8 @@ There's a lot of things we can track
 
 If you're just getting started with Application Insights [User Flows](https://docs.microsoft.com/en-us/azure/azure-monitor/app/usage-flows) is an easy  place to start since it gives you a visual representation of how your site is being used.
 
-[create-new]: /img/posts/20200101-001-az-portal-create-new.png "Resource Group - Create new resource"
-[search-appinsights]: /img/posts/20200101-002-az-portal-marketplace-search-appinsights.png "Search marketplace for Application Insights"
-[appinsights-create]: /img/posts/20200101-003-az-portal-appinsights-create.png "Click the create button"
-[appinsights-config]: /img/posts/20200101-004-az-portal-appinsights-example.png "Example Application Insights configuration"
-[instrumentationkey]: /img/posts/20200101-005-az-portal-appinsights-instrumentationkey.png "Find the Instrumentation Key"
+[create-new]: /posts/img/20200101-001-az-portal-create-new.png "Resource Group - Create new resource"
+[search-appinsights]: /posts/img/20200101-002-az-portal-marketplace-search-appinsights.png "Search marketplace for Application Insights"
+[appinsights-create]: /posts/img/20200101-003-az-portal-appinsights-create.png "Click the create button"
+[appinsights-config]: /posts/img/20200101-004-az-portal-appinsights-example.png "Example Application Insights configuration"
+[instrumentationkey]: /posts/img/20200101-005-az-portal-appinsights-instrumentationkey.png "Find the Instrumentation Key"

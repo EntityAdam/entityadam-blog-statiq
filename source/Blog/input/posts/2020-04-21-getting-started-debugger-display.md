@@ -127,8 +127,8 @@ I've covered a few things in this article, the `DebuggerDisplay` attribute as we
 
 
 
-[debugger-list-of-people1]: /img/posts/20200421-001-debugger-list-of-people.png "Debugger List of People"
-[debugger-list-of-people2]: /img/posts/20200421-002-debugger-list-of-people.png "Debugger List of People"
-[debugger-list-of-addresses1]: /img/posts/20200421-001-debugger-list-of-addresses.png "Debugger List of Addresses"
-[debugger-list-of-addresses2]: /img/posts/20200421-002-debugger-list-of-addresses.png "Debugger List of Addresses"
-[debugger-person-without-nickname]: /img/posts/20200421-001-person-without-nickname.png "Debugger Person without nickname"
+[debugger-list-of-people1]: /posts/img/20200421-001-debugger-list-of-people.png "Debugger List of People"
+[debugger-list-of-people2]: /posts/img/20200421-002-debugger-list-of-people.png "Debugger List of People"
+[debugger-list-of-addresses1]: /posts/img/20200421-001-debugger-list-of-addresses.png "Debugger List of Addresses"
+[debugger-list-of-addresses2]: /posts/img/20200421-002-debugger-list-of-addresses.png "Debugger List of Addresses"
+[debugger-person-without-nickname]: /posts/img/20200421-001-person-without-nickname.png "Debugger Person without nickname"
