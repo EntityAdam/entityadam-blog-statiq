@@ -16,7 +16,7 @@ GitHub Repository: [HappyStorage](https://github.com/EntityAdam/HappyStorage)
 ## What is MVVM?
 In a nutshell, MVVM is a design pattern derived from the Model-View-Presenter (MVP) pattern. The Model-View-Controller (MVC) pattern is also derived from MVP, but where MVC is suited to sit on top of a stateless HTTP protocol, MVVM is suited for user interface (UI) platforms with state and two way data binding.  MVVM is commonly implemented in Desktop (WPF / UWP), Web (Silverlight), and Mobile (Xamarin.Forms) applications.  Like the other frameworks, Blazor acts much like a Single Page Application (SPA) that has two way data binding, and can benefit from the MVVM pattern. So whether you have existing MVVM code in the form of a WPF or mobile application, or are starting green with new code you can leverage MVVM to re-use your existing code in Blazor, or share your code with other platforms respectively.
 
-![](MVVMPattern.png)
+![](posts/img/MVVMPattern.png)
 > More information on MVVM: [Wikipedia](https://en.wikipedia.org/wiki/Model%E2%80%93view%E2%80%93viewmodel)
 
 ----
