@@ -99,9 +99,9 @@ EXEC sp_addrolemember 'db_owner', 'isborked919';
 
 Now our web app's managed identity is mapped to the Azure SQL database. On to the application.
 
-[app-svc-menu]: /img/posts/20200926-001-app-svc-menu.png "Azure App Service Menu"
-[app-svc-identity-on]: /img/posts/20200926-002-app-svc-identity-on.png "Azure App Service Menu"
-[ad-admin-not-configured]: /img/posts/20200926-003-sql-server-ad-admin-not-configured.png "Azure Sql Server Overview"
+[app-svc-menu]: /posts/img/20200926-001-app-svc-menu.png "Azure App Service Menu"
+[app-svc-identity-on]: /posts/img/20200926-002-app-svc-identity-on.png "Azure App Service Menu"
+[ad-admin-not-configured]: /posts/img/20200926-003-sql-server-ad-admin-not-configured.png "Azure Sql Server Overview"
 
 # 3. The Application
 The application is nothing special. It's slightly less useful than a todo app. You can clone it and try it yourself, or just look at the important bits in the `web.config` file.
